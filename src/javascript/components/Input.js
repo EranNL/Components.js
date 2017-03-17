@@ -1,6 +1,8 @@
-class Input {
+import Component from './Component';
+
+class Input extends Component {
     constructor(element) {
-        this.element = element;
+        super(element);
 
     }
 }
