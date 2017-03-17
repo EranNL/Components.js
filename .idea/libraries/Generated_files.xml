@@ -1,0 +1,30 @@
+<component name="libraryTable">
+  <library name="Generated files" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/src/javascript/components/dom/Element.js" />
+        <item url="file://$PROJECT_DIR$/build/bundle.js" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/build/src/javascript/components/dom/Element.js" />
+      <root url="file://$PROJECT_DIR$/build/src/javascript/components/dom/Element.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/build/build/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/build/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/build/components/dom/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/build/build/components/dom/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/build/build/components/helpers/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/build/components/helpers/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/build/build/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/build/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/build/components/dom/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/build/build/components/dom/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/build/build/components/helpers/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/build/components/helpers/bundle.js" />
+      <root url="file://$PROJECT_DIR$/src/javascript/components/dom/Element.js" />
+      <root url="file://$PROJECT_DIR$/build/bundle.js" />
+    </CLASSES>
+    <SOURCES />
+  </library>
+</component>
