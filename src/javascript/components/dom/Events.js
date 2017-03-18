@@ -16,8 +16,10 @@ class Events {
 	 * @param {String} func The name of the method
 	 *
 	 * @return {boolean}
+	 *
+	 * @private
 	 */
-	functionExists(func) {
+	_functionExists(func) {
 		return this.instance.__proto__.hasOwnProperty(String(func));
 	}
 
@@ -29,7 +31,7 @@ class Events {
 	attachEvents() {
 		Object.keys(Event.prototype).forEach((ev) => {
 			let e = Str.toCamelCase('on ' + ev);
-			if(this.functionExists(e)) {
+			if(this._functionExists(e)) {
 				this.add(ev.toLowerCase(), () => this.instance.__proto__[e].apply(this.instance, [this.element, event]));
 			}
 
@@ -40,7 +42,7 @@ class Events {
 	 * Adds an event listener to the element
 	 *
 	 * @param {String} ev The name of the event
-	 * @param {Closure} callback The callback that has to be invoked when the event occurered.
+	 * @param {Function} callback The callback that has to be invoked when the event occurered.
 	 *
 	 * @return {void}
      */
