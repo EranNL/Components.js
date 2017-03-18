@@ -2,7 +2,7 @@
  *
  */
 
-import Events from '/dom/Events';
+import Events from './dom/Events';
 
 class Component {
 
@@ -12,3 +12,5 @@ class Component {
         this.events = new Events(this);
     }
 }
+
+export default Component;
