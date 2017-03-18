@@ -1,41 +1,41 @@
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-
+/******/
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-
+/******/
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
 /******/ 			l: false,
 /******/ 			exports: {}
 /******/ 		};
-
+/******/
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
+/******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.l = true;
-
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-
-
+/******/
+/******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-
+/******/
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-
+/******/
 /******/ 	// identity function for calling harmony imports with the correct context
 /******/ 	__webpack_require__.i = function(value) { return value; };
-
+/******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
@@ -46,7 +46,7 @@
 /******/ 			});
 /******/ 		}
 /******/ 	};
-
+/******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
 /******/ 	__webpack_require__.n = function(module) {
 /******/ 		var getter = module && module.__esModule ?
@@ -55,19 +55,86 @@
 /******/ 		__webpack_require__.d(getter, 'a', getter);
 /******/ 		return getter;
 /******/ 	};
-
+/******/
 /******/ 	// Object.prototype.hasOwnProperty.call
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-
+/******/
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-
+/******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+				value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Str = function () {
+				function Str() {
+								_classCallCheck(this, Str);
+				}
+
+				_createClass(Str, null, [{
+								key: 'toCamelCase',
+								value: function toCamelCase(string) {
+												var words = string.toLowerCase().split(' ');
+
+												for (var i = 1; i < words.length; i++) {
+																words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+												}
+
+												return words.join('');
+								}
+
+								/**
+        * Returns the give string with a capitalized first letter
+         * @param {String} string
+         * @returns String
+         */
+
+				}, {
+								key: 'ucFirst',
+								value: function ucFirst(string) {
+												return string.charAt(0).toUpperCase() + string.slice(1);
+								}
+
+								/**
+        * Returns the given string as an object
+        *
+        * @return {Object}
+         */
+
+				}, {
+								key: 'toObject',
+								value: function toObject() {
+												string = string.replace(/'/g, '"');
+												try {
+																return JSON.parse(string);
+												} catch (err) {
+																return {};
+												}
+								}
+				}]);
+
+				return Str;
+}();
+
+exports.default = Str;
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -81,9 +148,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Events = __webpack_require__(1);
+var _Events = __webpack_require__(2);
 
 var _Events2 = _interopRequireDefault(_Events);
+
+var _Str = __webpack_require__(0);
+
+var _Str2 = _interopRequireDefault(_Str);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -116,7 +187,7 @@ var Element = function () {
 
 
 	_createClass(Element, [{
-		key: "_select",
+		key: '_select',
 		value: function _select(selector) {
 
 			var returnElements = [];
@@ -150,6 +221,46 @@ var Element = function () {
 		}
 
 		/**
+   * Returns the data attributes assigned to the element
+   *
+   * @example
+   * <div data-component="component" data-foo="bar" />
+   *
+   * @param {String} key (optional) The specific value of a attribute key that has to be returned
+   *
+   * @return {mixed} 	null: when not a specific element |
+   * 				   	String: when a key is specified |
+   * 					Object: when returning the whole options object
+   */
+
+	}, {
+		key: 'getData',
+		value: function getData(key) {
+			if (!this.element || this.element.length) {
+				return null;
+			}
+
+			var returnData = {};
+			var i = 0;
+
+			for (; i < this.element.attributes.length; i++) {
+				var attribute = this.element.attributes[i];
+
+				if (attribute.name.indexOf('data-') == 0) {
+					var name = attribute.name.substr("data-".length, attribute.name.length - 1);
+
+					returnData[name] = /{.*}/g.test(attribute.value) ? _Str2.default.toObject(attribute.value) : attribute.value;
+				}
+			}
+
+			if (key) {
+				return returnData[key] || "";
+			}
+
+			return returnData;
+		}
+
+		/**
    * Add an event to the element(s)
    *
    * @param {String} ev The name of the event
@@ -159,7 +270,7 @@ var Element = function () {
    */
 
 	}, {
-		key: "addEvent",
+		key: 'addEvent',
 		value: function addEvent(ev, callback) {
 			this.element.addEventListener(ev, callback);
 		}
@@ -173,31 +284,42 @@ var Element = function () {
    */
 
 	}, {
-		key: "each",
+		key: 'each',
 		value: function each(callback) {
 			if (_typeof(this.element) == "object") {
 				for (var i = 0; i < this.element.length; i++) {
 					if (typeof callback == 'function') {
-						callback(this.element[i], i);
+						callback(new Element(this.element[i]), i);
 					}
 				}
 			} else {
 				if (typeof callback == 'function') {
-					callback(this.element, 0);
+					callback(new Element(this.element), 0);
 				}
 			}
 		}
 
 		/**
   * Gets the children for this element.
-   * @returns {number}
+   * @returns {Element}
    */
 
 	}, {
-		key: "getChildren",
-		value: function getChildren() {}
+		key: 'children',
+		value: function children(selector) {
+			return new Element(selector);
+		}
+
+		/**
+   * Returns the height of the element
+   *
+   * @returns {number}
+   *
+   * @todo Improve options for height
+   */
+
 	}, {
-		key: "getHeight",
+		key: 'getHeight',
 		value: function getHeight() {
 			return this.element.clientHeight;
 		}
@@ -209,7 +331,7 @@ var Element = function () {
 exports.default = Element;
 
 /***/ }),
-/* 1 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -221,11 +343,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Str = __webpack_require__(2);
+var _Str = __webpack_require__(0);
 
 var _Str2 = _interopRequireDefault(_Str);
 
-var _Element = __webpack_require__(0);
+var _Element = __webpack_require__(1);
 
 var _Element2 = _interopRequireDefault(_Element);
 
@@ -288,64 +410,136 @@ var Events = function () {
 exports.default = Events;
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Str = function () {
-	function Str() {
-		_classCallCheck(this, Str);
-	}
-
-	_createClass(Str, null, [{
-		key: 'toCamelCase',
-		value: function toCamelCase(string) {
-			var words = string.toLowerCase().split(' ');
-
-			for (var i = 1; i < words.length; i++) {
-				words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
-			}
-
-			return words.join('');
-		}
-	}]);
-
-	return Str;
-}();
-
-exports.default = Str;
-
-/***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
-var _Element = __webpack_require__(0);
+var _Events = __webpack_require__(2);
 
-var _Element2 = _interopRequireDefault(_Element);
+var _Events2 = _interopRequireDefault(_Events);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } /**
+                                                                                                                                                           *
+                                                                                                                                                           */
+
+var Component = function Component(element) {
+    _classCallCheck(this, Component);
+
+    this.element = element;
+
+    this.events = new _Events2.default(this);
+};
+
+exports.default = Component;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var map = {
+	"./Component.js": 3,
+	"./Input.js": 5,
+	"./dom/Element.js": 1,
+	"./dom/Events.js": 2,
+	"./helpers/Str.js": 0
+};
+function webpackContext(req) {
+	return __webpack_require__(webpackContextResolve(req));
+};
+function webpackContextResolve(req) {
+	var id = map[req];
+	if(!(id + 1)) // check for number
+		throw new Error("Cannot find module '" + req + "'.");
+	return id;
+};
+webpackContext.keys = function webpackContextKeys() {
+	return Object.keys(map);
+};
+webpackContext.resolve = webpackContextResolve;
+module.exports = webpackContext;
+webpackContext.id = 4;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _Component2 = __webpack_require__(3);
+
+var _Component3 = _interopRequireDefault(_Component2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Input = function (_Component) {
+    _inherits(Input, _Component);
+
+    function Input(element) {
+        _classCallCheck(this, Input);
+
+        return _possibleConstructorReturn(this, (Input.__proto__ || Object.getPrototypeOf(Input)).call(this, element));
+    }
+
+    return Input;
+}(_Component3.default);
+
+exports.default = Input;
+
+/***/ }),
+/* 6 */,
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Element = __webpack_require__(1);
+
+var _Element2 = _interopRequireDefault(_Element);
+
+var _Str = __webpack_require__(0);
+
+var _Str2 = _interopRequireDefault(_Str);
+
+var _Events = __webpack_require__(2);
+
+var _Events2 = _interopRequireDefault(_Events);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+"use strict";
+
 /**
  * Main class for the library. This class has to be called with a given context
  * This context is used so
  */
+
+window.componentList = {};
+
 var OctaBootstrap = function () {
 
 	/**
@@ -355,36 +549,64 @@ var OctaBootstrap = function () {
 		_classCallCheck(this, OctaBootstrap);
 
 		this.context = new _Element2.default(element);
-
-		return this.context;
 	}
-
-	/**
-  * Initialize the framework inside the given context
-  *
-  * @return {void}
-  */
-
 
 	_createClass(OctaBootstrap, [{
 		key: 'init',
+
+
+		/**
+   * Initialize the framework inside the given context
+   *
+   * @return {void}
+   */
 		value: function init() {
-			this.context.children('[data-component]').each(function (element) {});
+			this.context.children('[data-component]').each(function (element) {
+				var com = element.getData('component').split(' ');
+				var i = 0;
+
+				for (; i < com.length; i++) {
+					try {
+						var component = __webpack_require__(4)("./" + _Str2.default.ucFirst(com[i]) + '.js').default;
+						new component(element);
+					} catch (err) {
+						//no module was found, try to fetch it from the array
+						if (componentList[com[i]] != undefined) {
+							new componentList[com[i]](element);
+						}
+					}
+				}
+			});
+		}
+	}], [{
+		key: 'registerComponent',
+		value: function registerComponent(instance, name) {
+			if (componentList[name] == undefined) {
+				componentList[name] = instance;
+			}
+		}
+	}, {
+		key: 'registerEvents',
+		value: function registerEvents(instance) {
+			return new _Events2.default(instance);
 		}
 	}]);
 
 	return OctaBootstrap;
 }();
 
+//Put the function in the global window object so it is accessible outside the scope of webpack
+
+
+window.OctaBootstrap = OctaBootstrap;
+
 /**
  * Overwrite the existing Octa variable
  * @todo Delete after browsers officially support ES6?
  */
-
-
-function Octa(element) {
+window.Octa = window.O = function (element) {
 	return new OctaBootstrap(element);
-}
+};
 
 /***/ })
 /******/ ]);
