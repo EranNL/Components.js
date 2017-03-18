@@ -4,12 +4,12 @@ import Str from './../helpers/Str.js';
 class Element {
 
 	constructor(element = ""){
-		this.element = this._select(element);
+		this.htmlElement = this._select(element);
 		//this.options = this.data();
 
 		//Register a new Events instance for this element, so events are captured.
 		//But only on non-objects
-		if(!this.element.length) {
+		if(!this.htmlElement.length) {
 			this.events = new Events(this);
 		}
 	}
@@ -48,7 +48,7 @@ class Element {
 		} else if (selector.length) {
 			//getElementsByClassName or getElementsByClassName
 			for(let i = 0; i < selector.length; i++) {
-				returnElements.push(new self(selector[i]));
+				returnElements.push(new Element(selector[i]));
 			}
 		}
 		return returnElements;
@@ -67,15 +67,15 @@ class Element {
      * 					Object: when returning the whole options object
      */
     getData(key) {
-        if(!this.element || this.element.length) {
+        if(!this.htmlElement || this.htmlElement.length) {
             return null;
         }
 
         let returnData = {};
         let i = 0
 
-        for(; i < this.element.attributes.length; i++) {
-            let attribute = this.element.attributes[i];
+        for(; i < this.htmlElement.attributes.length; i++) {
+            let attribute = this.htmlElement.attributes[i];
 
             if(attribute.name.indexOf('data-') == 0) {
                 let name = attribute.name.substr("data-".length, attribute.name.length - 1);
@@ -92,18 +92,6 @@ class Element {
     }
 
 	/**
-	 * Add an event to the element(s)
-	 *
-	 * @param {String} ev The name of the event
-	 * @param {closure} callback The callback that has to be fired when the event is triggered
-	 *
-	 * @return {void}
-	 */
-	addEvent(ev, callback) {
-		this.element.addEventListener(ev, callback);
-	}
-
-	/**
 	 * Call a callback for every element in the element object or just the only element that is specified
 	 *
 	 * @param {closure} callback The callback thas has to be called on every element
@@ -111,15 +99,15 @@ class Element {
 	 * @return {void}
 	 */
 	each(callback) {
-		if( typeof this.element == "object" ) {
-			for( let i = 0; i < this.element.length; i++ ) {
+		if( typeof this.htmlElement == "object" ) {
+			for( let i = 0; i < this.htmlElement.length; i++ ) {
 				if( typeof callback == 'function' ) {
-                    callback(new Element(this.element[i]), i);
+                    callback(new Element(this.htmlElement[i]), i);
 				}
 			}
 		} else {
 			if( typeof callback == 'function') {
-                callback(new Element(this.element), 0);
+                callback(new Element(this.htmlElement), 0);
 			}
 		}
 	}
@@ -141,7 +129,11 @@ class Element {
      * @todo Improve options for height
      */
 	getHeight() {
-		return this.element.clientHeight;
+		return this.htmlElement.clientHeight;
+	}
+
+	on(ev, callback) {
+		this.events.add(ev, (event) => callback(new Element(this.htmlElement), event));
 	}
 }
 
