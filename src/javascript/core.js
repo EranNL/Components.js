@@ -15,9 +15,16 @@ class OctaBootstrap {
 
 	/**
 	 * @var {Element}
+	 *
+	 * @todo: Improve!!!
 	 */
-	constructor(element) {
-		 this.context = new Element(element);
+	constructor(element, init) {
+		 if( init ) {
+             this.context = new Element(element);
+		 }
+		 else {
+		 	return new Element(element);
+		 }
 	}
 
 	static registerComponent(instance, name) {
@@ -48,8 +55,11 @@ class OctaBootstrap {
 				catch ( err ) {
 					//no module was found, try to fetch it from the array
 					if( componentList[com[i]] != undefined ) {
-						new componentList[com[i]](element);
+						new componentList[com[i]](element, OctaBootstrap);
 					}
+					else {
+					    console.error('Module ' + com[i] + 'was not found. Does it exist');
+                    }
 				}
             }
 		})
