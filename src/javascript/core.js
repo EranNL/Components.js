@@ -58,7 +58,7 @@ class OctaBootstrap {
 						new componentList[com[i]](element, OctaBootstrap);
 					}
 					else {
-					    console.error('Module ' + com[i] + 'was not found. Does it exist');
+					    console.error('Module ' + com[i] + 'was not found. Does it exist?');
                     }
 				}
             }
