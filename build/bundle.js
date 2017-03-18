@@ -63,11 +63,106 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Str = __webpack_require__(1);
+
+var _Str2 = _interopRequireDefault(_Str);
+
+var _Element = __webpack_require__(2);
+
+var _Element2 = _interopRequireDefault(_Element);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Events = function () {
+	function Events(instance) {
+		_classCallCheck(this, Events);
+
+		this.instance = instance;
+		this.element = this.instance instanceof _Element2.default ? this.instance.htmlElement : this.instance.element.htmlElement;
+
+		this.attachEvents();
+	}
+
+	/**
+  * Check whether a function exists in the class where this instance is called
+  *
+  * @param {String} func The name of the method
+  *
+  * @return {boolean}
+  *
+  * @private
+  */
+
+
+	_createClass(Events, [{
+		key: "_functionExists",
+		value: function _functionExists(func) {
+			return this.instance.__proto__.hasOwnProperty(String(func));
+		}
+
+		/**
+   * Attach the current events to the element of the calling instance
+   *
+   * @return {void}
+   */
+
+	}, {
+		key: "attachEvents",
+		value: function attachEvents() {
+			var _this = this;
+
+			console.log(Event.prototype);
+			Object.keys(Event.prototype).forEach(function (ev) {
+				var e = _Str2.default.toCamelCase('on ' + ev);
+				if (_this._functionExists(e)) {
+					_this.add(ev.toLowerCase(), function () {
+						return _this.instance.__proto__[e].apply(_this.instance, [_this.element, event]);
+					});
+				}
+			});
+		}
+
+		/**
+  * Adds an event listener to the element
+  *
+  * @param {String} ev The name of the event
+  * @param {Function} callback The callback that has to be invoked when the event occurered.
+  *
+  * @return {void}
+   */
+
+	}, {
+		key: "add",
+		value: function add(ev, callback) {
+			this.element.addEventListener(ev, callback);
+		}
+	}]);
+
+	return Events;
+}();
+
+exports.default = Events;
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -134,7 +229,7 @@ var Str = function () {
 exports.default = Str;
 
 /***/ }),
-/* 1 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -148,11 +243,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Events = __webpack_require__(2);
+var _Events = __webpack_require__(0);
 
 var _Events2 = _interopRequireDefault(_Events);
 
-var _Str = __webpack_require__(0);
+var _Str = __webpack_require__(1);
 
 var _Str2 = _interopRequireDefault(_Str);
 
@@ -166,12 +261,12 @@ var Element = function () {
 
 		_classCallCheck(this, Element);
 
-		this.element = this._select(element);
+		this.htmlElement = this._select(element);
 		//this.options = this.data();
 
 		//Register a new Events instance for this element, so events are captured.
 		//But only on non-objects
-		if (!this.element.length) {
+		if (!this.htmlElement.length) {
 			this.events = new _Events2.default(this);
 		}
 	}
@@ -214,7 +309,7 @@ var Element = function () {
 			} else if (selector.length) {
 				//getElementsByClassName or getElementsByClassName
 				for (var i = 0; i < selector.length; i++) {
-					returnElements.push(new self(selector[i]));
+					returnElements.push(new Element(selector[i]));
 				}
 			}
 			return returnElements;
@@ -236,15 +331,15 @@ var Element = function () {
 	}, {
 		key: 'getData',
 		value: function getData(key) {
-			if (!this.element || this.element.length) {
+			if (!this.htmlElement || this.htmlElement.length) {
 				return null;
 			}
 
 			var returnData = {};
 			var i = 0;
 
-			for (; i < this.element.attributes.length; i++) {
-				var attribute = this.element.attributes[i];
+			for (; i < this.htmlElement.attributes.length; i++) {
+				var attribute = this.htmlElement.attributes[i];
 
 				if (attribute.name.indexOf('data-') == 0) {
 					var name = attribute.name.substr("data-".length, attribute.name.length - 1);
@@ -261,21 +356,6 @@ var Element = function () {
 		}
 
 		/**
-   * Add an event to the element(s)
-   *
-   * @param {String} ev The name of the event
-   * @param {closure} callback The callback that has to be fired when the event is triggered
-   *
-   * @return {void}
-   */
-
-	}, {
-		key: 'addEvent',
-		value: function addEvent(ev, callback) {
-			this.element.addEventListener(ev, callback);
-		}
-
-		/**
    * Call a callback for every element in the element object or just the only element that is specified
    *
    * @param {closure} callback The callback thas has to be called on every element
@@ -286,15 +366,15 @@ var Element = function () {
 	}, {
 		key: 'each',
 		value: function each(callback) {
-			if (_typeof(this.element) == "object") {
-				for (var i = 0; i < this.element.length; i++) {
+			if (_typeof(this.htmlElement) == "object") {
+				for (var i = 0; i < this.htmlElement.length; i++) {
 					if (typeof callback == 'function') {
-						callback(new Element(this.element[i]), i);
+						callback(new Element(this.htmlElement[i]), i);
 					}
 				}
 			} else {
 				if (typeof callback == 'function') {
-					callback(new Element(this.element), 0);
+					callback(new Element(this.htmlElement), 0);
 				}
 			}
 		}
@@ -311,6 +391,20 @@ var Element = function () {
 		}
 
 		/**
+   * Adds an class to the element
+   */
+
+	}, {
+		key: 'addClass',
+		value: function addClass(className) {
+			if (this.htmlElement.className.length == 0) {
+				this.htmlElement.className = String(className);
+			} else if (this.htmlElement.className.indexOf(String(className)) == -1) {
+				this.htmlElement.className += " " + String(className);
+			}
+		}
+
+		/**
    * Returns the height of the element
    *
    * @returns {number}
@@ -321,7 +415,31 @@ var Element = function () {
 	}, {
 		key: 'getHeight',
 		value: function getHeight() {
-			return this.element.clientHeight;
+			return this.htmlElement.clientHeight;
+		}
+
+		/**
+   * Event handler to listen to events occuring on the element and then executing a callback
+   * @param {*} ev The name of the event
+   * @param {Function} callback
+   */
+
+	}, {
+		key: 'on',
+		value: function on(ev, callback) {
+			var _this = this;
+
+			if ((typeof ev === 'undefined' ? 'undefined' : _typeof(ev)) == 'object') {
+				for (var i = 0; i < ev.length; i++) {
+					this.events.add(ev[i], function (event) {
+						return callback(new Element(_this.htmlElement), event);
+					});
+				}
+			} else {
+				this.events.add(ev, function (event) {
+					return callback(new Element(_this.htmlElement), event);
+				});
+			}
 		}
 	}]);
 
@@ -329,85 +447,6 @@ var Element = function () {
 }();
 
 exports.default = Element;
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Str = __webpack_require__(0);
-
-var _Str2 = _interopRequireDefault(_Str);
-
-var _Element = __webpack_require__(1);
-
-var _Element2 = _interopRequireDefault(_Element);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Events = function () {
-	function Events(instance) {
-		_classCallCheck(this, Events);
-
-		this.instance = instance;
-
-		this._attachEvents();
-	}
-
-	/**
-  * Check whether a function exists in the class where this instance is called
-  *
-  * @param {String} func The name of the method
-  *
-  * @return {boolean}
-  */
-
-
-	_createClass(Events, [{
-		key: 'functionExists',
-		value: function functionExists(func) {
-			return String(func) in this.instance.__proto__;
-		}
-
-		/**
-   * Attach the current events to the element of the calling instance
-   *
-   * @return {void}
-   */
-
-	}, {
-		key: '_attachEvents',
-		value: function _attachEvents() {
-			var _this = this;
-
-			var element = this.instance instanceof _Element2.default ? this.instance : this.instance.element;
-
-			Object.keys(Event.prototype).forEach(function (ev) {
-				var e = _Str2.default.toCamelCase('on ' + ev);
-				if (_this.functionExists(e)) {
-					element.addEvent(ev.toLowerCase(), function () {
-						return _this.instance.__proto__[e].apply(_this.instance, [event]);
-					});
-					return;
-				}
-			});
-		}
-	}]);
-
-	return Events;
-}();
-
-exports.default = Events;
 
 /***/ }),
 /* 3 */
@@ -420,7 +459,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _Events = __webpack_require__(2);
+var _Events = __webpack_require__(0);
 
 var _Events2 = _interopRequireDefault(_Events);
 
@@ -447,9 +486,9 @@ exports.default = Component;
 var map = {
 	"./Component.js": 3,
 	"./Input.js": 5,
-	"./dom/Element.js": 1,
-	"./dom/Events.js": 2,
-	"./helpers/Str.js": 0
+	"./dom/Element.js": 2,
+	"./dom/Events.js": 0,
+	"./helpers/Str.js": 1
 };
 function webpackContext(req) {
 	return __webpack_require__(webpackContextResolve(req));
@@ -506,8 +545,7 @@ var Input = function (_Component) {
 exports.default = Input;
 
 /***/ }),
-/* 6 */,
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -515,15 +553,15 @@ exports.default = Input;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Element = __webpack_require__(1);
+var _Element = __webpack_require__(2);
 
 var _Element2 = _interopRequireDefault(_Element);
 
-var _Str = __webpack_require__(0);
+var _Str = __webpack_require__(1);
 
 var _Str2 = _interopRequireDefault(_Str);
 
-var _Events = __webpack_require__(2);
+var _Events = __webpack_require__(0);
 
 var _Events2 = _interopRequireDefault(_Events);
 
@@ -544,11 +582,17 @@ var OctaBootstrap = function () {
 
 	/**
   * @var {Element}
+  *
+  * @todo: Improve!!!
   */
-	function OctaBootstrap(element) {
+	function OctaBootstrap(element, init) {
 		_classCallCheck(this, OctaBootstrap);
 
-		this.context = new _Element2.default(element);
+		if (init) {
+			this.context = new _Element2.default(element);
+		} else {
+			return new _Element2.default(element);
+		}
 	}
 
 	_createClass(OctaBootstrap, [{
@@ -572,7 +616,9 @@ var OctaBootstrap = function () {
 					} catch (err) {
 						//no module was found, try to fetch it from the array
 						if (componentList[com[i]] != undefined) {
-							new componentList[com[i]](element);
+							new componentList[com[i]](element, OctaBootstrap);
+						} else {
+							console.error('Module ' + com[i] + 'was not found. Does it exist');
 						}
 					}
 				}
