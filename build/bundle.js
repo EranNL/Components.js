@@ -129,7 +129,6 @@ var Events = function () {
 		value: function attachEvents() {
 			var _this = this;
 
-			console.log(Event.prototype);
 			Object.keys(Event.prototype).forEach(function (ev) {
 				var e = _Str2.default.toCamelCase('on ' + ev);
 				if (_this._functionExists(e)) {
@@ -392,6 +391,10 @@ var Element = function () {
 
 		/**
    * Adds an class to the element
+  *
+  * @param {String} className The name of the class youd like to add
+  *
+  * @return {void}
    */
 
 	}, {
@@ -402,6 +405,18 @@ var Element = function () {
 			} else if (this.htmlElement.className.indexOf(String(className)) == -1) {
 				this.htmlElement.className += " " + String(className);
 			}
+		}
+
+		/**
+  * Checks whether the element has a specific class
+  *
+  * @return {boolean}
+   */
+
+	}, {
+		key: 'hasClass',
+		value: function hasClass(className) {
+			return this.htmlElement.className.indexOf(className) != -1;
 		}
 
 		/**
@@ -420,7 +435,8 @@ var Element = function () {
 
 		/**
    * Event handler to listen to events occuring on the element and then executing a callback
-   * @param {*} ev The name of the event
+   * @param {*} ev String: The name of the event
+   *               Array: List of events
    * @param {Function} callback
    */
 
@@ -618,7 +634,7 @@ var OctaBootstrap = function () {
 						if (componentList[com[i]] != undefined) {
 							new componentList[com[i]](element, OctaBootstrap);
 						} else {
-							console.error('Module ' + com[i] + 'was not found. Does it exist');
+							console.error('Module ' + com[i] + 'was not found. Does it exist?');
 						}
 					}
 				}
