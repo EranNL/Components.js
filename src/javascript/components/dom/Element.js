@@ -122,6 +122,30 @@ class Element {
 	}
 
     /**
+     * Adds an class to the element
+	 *
+	 * @param {String} className The name of the class youd like to add
+	 *
+	 * @return {void}
+     */
+    addClass(className) {
+        if(this.htmlElement.className.length == 0) {
+            this.htmlElement.className = String(className);
+        } else if (this.htmlElement.className.indexOf(String(className)) == -1) {
+            this.htmlElement.className += " " + String(className);
+        }
+    }
+
+    /**
+	 * Checks whether the element has a specific class
+	 *
+	 * @return {boolean}
+     */
+    hasClass(className) {
+    	return this.htmlElement.className.indexOf(className) != -1;
+	}
+
+    /**
      * Returns the height of the element
      *
      * @returns {number}
@@ -132,6 +156,12 @@ class Element {
 		return this.htmlElement.clientHeight;
 	}
 
+    /**
+     * Event handler to listen to events occuring on the element and then executing a callback
+     * @param {*} ev String: The name of the event
+     *               Array: List of events
+     * @param {Function} callback
+     */
 	on(ev, callback) {
 		if(typeof ev == 'object' ) {
 			for(let i = 0; i < ev.length; i++) {
