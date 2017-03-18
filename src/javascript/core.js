@@ -1,10 +1,16 @@
 import Element from './components/dom/Element.js';
 import Str from './components/helpers/Str.js';
+import Events from "./components/dom/Events";
+
+"use strict";
 
 /**
  * Main class for the library. This class has to be called with a given context
  * This context is used so
  */
+
+window.componentList = {};
+
 class OctaBootstrap {
 
 	/**
@@ -12,8 +18,17 @@ class OctaBootstrap {
 	 */
 	constructor(element) {
 		 this.context = new Element(element);
+	}
 
-	 }
+	static registerComponent(instance, name) {
+		if( componentList[name] == undefined ) {
+			componentList[name] = instance;
+		}
+	}
+
+	static registerEvents(instance) {
+		return new Events(instance);
+	}
 
 	/**
 	 * Initialize the framework inside the given context
@@ -26,12 +41,23 @@ class OctaBootstrap {
 			let i = 0;
 
 			for(; i < com.length; i++) {
-                let component = require('./components/' + Str.ucFirst(com[i]) + '.js').default;
-                new component(element);
+				try {
+                    let component = require('./components/' + Str.ucFirst(com[i]) + '.js').default;
+                    new component(element);
+				}
+				catch ( err ) {
+					//no module was found, try to fetch it from the array
+					if( componentList[com[i]] != undefined ) {
+						new componentList[com[i]](element);
+					}
+				}
             }
 		})
 	}
 }
+
+//Put the function in the global window object so it is accessible outside the scope of webpack
+window.OctaBootstrap = OctaBootstrap;
 
 /**
  * Overwrite the existing Octa variable
@@ -41,4 +67,3 @@ window.Octa = window.O = function(element) {
 	return new OctaBootstrap(element);
 };
 
-console.log(window);
