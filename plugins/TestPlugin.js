@@ -1,6 +1,6 @@
 
 
-const TestPlugin = function (element) {
+const TestPlugin = function (element, engine) {
     "use strict";
     this.element = element;
 
