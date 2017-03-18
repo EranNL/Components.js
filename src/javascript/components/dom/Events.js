@@ -1,12 +1,13 @@
-import Str from '../helpers/Str.js';
-import Element from './Element.js';
+import Str from "../helpers/Str.js";
+import Element from "./Element.js";
 
 class Events {
 
 	constructor(instance) {
 		this.instance = instance;
+        this.element = this.instance instanceof Element ? this.instance.htmlElement : this.instance.element.htmlElement;
 
-		this._attachEvents();
+		this.attachEvents();
 	}
 
 	/**
@@ -17,7 +18,7 @@ class Events {
 	 * @return {boolean}
 	 */
 	functionExists(func) {
-		return String(func) in this.instance.__proto__;
+		return this.instance.__proto__.hasOwnProperty(String(func));
 	}
 
 	/**
@@ -25,17 +26,26 @@ class Events {
 	 *
 	 * @return {void}
 	 */
-	_attachEvents() {
-		let element = this.instance instanceof Element ? this.instance : this.instance.element;
-
+	attachEvents() {
 		Object.keys(Event.prototype).forEach((ev) => {
 			let e = Str.toCamelCase('on ' + ev);
 			if(this.functionExists(e)) {
-				element.addEvent(ev.toLowerCase(), () => this.instance.__proto__[e].apply(this.instance, [event]));
-				return;
+				this.add(ev.toLowerCase(), () => this.instance.__proto__[e].apply(this.instance, [this.element, event]));
 			}
 
     	});
+	}
+
+    /**
+	 * Adds an event listener to the element
+	 *
+	 * @param {String} ev The name of the event
+	 * @param {Closure} callback The callback that has to be invoked when the event occurered.
+	 *
+	 * @return {void}
+     */
+    add(ev, callback) {
+        this.element.addEventListener(ev, callback)
 	}
 }
 
