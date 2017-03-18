@@ -133,7 +133,14 @@ class Element {
 	}
 
 	on(ev, callback) {
-		this.events.add(ev, (event) => callback(new Element(this.htmlElement), event));
+		if(typeof ev == 'object' ) {
+			for(let i = 0; i < ev.length; i++) {
+                this.events.add(ev[i], (event) => callback(new Element(this.htmlElement), event));
+			}
+		}
+		else {
+            this.events.add(ev, (event) => callback(new Element(this.htmlElement), event));
+		}
 	}
 }
 
