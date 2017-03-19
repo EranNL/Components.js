@@ -250,6 +250,14 @@ var _Str = __webpack_require__(1);
 
 var _Str2 = _interopRequireDefault(_Str);
 
+var _HeightDimension = __webpack_require__(7);
+
+var _HeightDimension2 = _interopRequireDefault(_HeightDimension);
+
+var _WidthDimension = __webpack_require__(8);
+
+var _WidthDimension2 = _interopRequireDefault(_WidthDimension);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -322,7 +330,7 @@ var Element = function () {
    *
    * @param {String} key (optional) The specific value of a attribute key that has to be returned
    *
-   * @return {mixed} 	null: when not a specific element |
+   * @return {*} 	null: when not a specific element |
    * 				   	String: when a key is specified |
    * 					Object: when returning the whole options object
    */
@@ -357,7 +365,7 @@ var Element = function () {
 		/**
    * Call a callback for every element in the element object or just the only element that is specified
    *
-   * @param {closure} callback The callback thas has to be called on every element
+   * @param {Function} callback The callback thas has to be called on every element
    *
    * @return {void}
    */
@@ -422,15 +430,26 @@ var Element = function () {
 		/**
    * Returns the height of the element
    *
-   * @returns {number}
+   * @returns {HeightDimension}
    *
-   * @todo Improve options for height
    */
 
 	}, {
 		key: 'getHeight',
 		value: function getHeight() {
-			return this.htmlElement.clientHeight;
+			return new _HeightDimension2.default(this.htmlElement);
+		}
+
+		/**
+  * Returns the width of the element
+  *
+  * @return {WidthDimension}
+   */
+
+	}, {
+		key: 'getWidth',
+		value: function getWidth() {
+			return new _WidthDimension2.default(this.htmlElement);
 		}
 
 		/**
@@ -504,6 +523,9 @@ var map = {
 	"./Input.js": 5,
 	"./dom/Element.js": 2,
 	"./dom/Events.js": 0,
+	"./dom/dimensions/Dimension.js": 9,
+	"./dom/dimensions/HeightDimension.js": 7,
+	"./dom/dimensions/WidthDimension.js": 8,
 	"./helpers/Str.js": 1
 };
 function webpackContext(req) {
@@ -669,6 +691,167 @@ window.OctaBootstrap = OctaBootstrap;
 window.Octa = window.O = function (element) {
 	return new OctaBootstrap(element);
 };
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Dimension2 = __webpack_require__(9);
+
+var _Dimension3 = _interopRequireDefault(_Dimension2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var HeightDimension = function (_Dimension) {
+    _inherits(HeightDimension, _Dimension);
+
+    function HeightDimension(htmlElement) {
+        _classCallCheck(this, HeightDimension);
+
+        var _this = _possibleConstructorReturn(this, (HeightDimension.__proto__ || Object.getPrototypeOf(HeightDimension)).call(this, htmlElement));
+
+        _this.height();
+        return _this;
+    }
+
+    _createClass(HeightDimension, [{
+        key: "height",
+        value: function height() {
+            if (this.htmlElement.length) {
+                for (var i = 0; i < this.htmlElement.length; i++) {
+                    this.dimension += this.htmlElement[i].clientHeight;
+                }
+            } else {
+                this.dimension = this.htmlElement.clientHeight;
+            }
+
+            return this;
+        }
+    }, {
+        key: "withPadding",
+        value: function withPadding() {
+            //@todo implementation
+            return this;
+        }
+    }, {
+        key: "withMargin",
+        value: function withMargin() {
+            //@todo implementation
+            return this;
+        }
+    }]);
+
+    return HeightDimension;
+}(_Dimension3.default);
+
+exports.default = HeightDimension;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Dimension2 = __webpack_require__(9);
+
+var _Dimension3 = _interopRequireDefault(_Dimension2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var WidthDimension = function (_Dimension) {
+    _inherits(WidthDimension, _Dimension);
+
+    function WidthDimension(htmlElement) {
+        _classCallCheck(this, WidthDimension);
+
+        var _this = _possibleConstructorReturn(this, (WidthDimension.__proto__ || Object.getPrototypeOf(WidthDimension)).call(this, htmlElement));
+
+        _this.width();
+        return _this;
+    }
+
+    _createClass(WidthDimension, [{
+        key: "width",
+        value: function width() {
+            if (this.htmlElement.length) {
+                for (var i = 0; i < this.htmlElement.length; i++) {
+                    this.dimension += this.htmlElement[i].clientWidth;
+                }
+            } else {
+                this.dimension = this.htmlElement.clientWidth;
+            }
+
+            return this;
+        }
+    }]);
+
+    return WidthDimension;
+}(_Dimension3.default);
+
+exports.default = WidthDimension;
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dimension = function () {
+    function Dimension(htmlElement) {
+        _classCallCheck(this, Dimension);
+
+        this.htmlElement = htmlElement;
+        this.dimension = 0;
+    }
+
+    _createClass(Dimension, [{
+        key: "calculate",
+        value: function calculate() {
+            return this.dimension;
+        }
+    }]);
+
+    return Dimension;
+}();
+
+exports.default = Dimension;
 
 /***/ })
 /******/ ]);
