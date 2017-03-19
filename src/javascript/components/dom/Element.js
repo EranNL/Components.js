@@ -1,5 +1,7 @@
 import Events from './Events.js';
 import Str from './../helpers/Str.js';
+import HeightDimension from './dimensions/HeightDimension';
+import WidthDimension from './dimensions/WidthDimension';
 
 class Element {
 
@@ -62,7 +64,7 @@ class Element {
      *
      * @param {String} key (optional) The specific value of a attribute key that has to be returned
      *
-     * @return {mixed} 	null: when not a specific element |
+     * @return {*} 	null: when not a specific element |
      * 				   	String: when a key is specified |
      * 					Object: when returning the whole options object
      */
@@ -94,7 +96,7 @@ class Element {
 	/**
 	 * Call a callback for every element in the element object or just the only element that is specified
 	 *
-	 * @param {closure} callback The callback thas has to be called on every element
+	 * @param {Function} callback The callback thas has to be called on every element
 	 *
 	 * @return {void}
 	 */
@@ -148,12 +150,20 @@ class Element {
     /**
      * Returns the height of the element
      *
-     * @returns {number}
+     * @returns {HeightDimension}
      *
-     * @todo Improve options for height
      */
 	getHeight() {
-		return this.htmlElement.clientHeight;
+		return new HeightDimension(this.htmlElement);
+	}
+
+    /**
+	 * Returns the width of the element
+	 *
+	 * @return {WidthDimension}
+     */
+	getWidth() {
+		return new WidthDimension(this.htmlElement);
 	}
 
     /**
