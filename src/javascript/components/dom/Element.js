@@ -236,7 +236,7 @@ class Element {
 	    if( this.isCollection() ) {
             if(typeof ev == 'object' ) {
                 for(let i = 0; i < ev.length; i++) {
-                    this.htmlElement.each((element) => {
+                    this.htmlElement.each(element => {
                         element.events.add(ev[i], (event) => callback(new Element(element.htmlElement), event));
                     })
                 }
