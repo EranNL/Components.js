@@ -9,10 +9,10 @@ class HeightDimension extends Dimension {
     }
 
     height() {
-        if( this.htmlElement.length ) {
-            for( let i = 0; i < this.htmlElement.length; i++ ) {
-                this.dimension += this.htmlElement[i].clientHeight;
-            }
+        if( this.htmlElement.isCollection() ) {
+            this.htmlElement.each(element => {
+                this.dimension += element.htmlElement.clientHeight;
+            })
         }
         else {
             this.dimension = this.htmlElement.clientHeight;
