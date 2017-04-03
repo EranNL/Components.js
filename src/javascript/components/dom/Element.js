@@ -1,7 +1,9 @@
 import Events from './Events.js';
-import Str from './../helpers/Str.js';
 import HeightDimension from './dimensions/HeightDimension';
 import WidthDimension from './dimensions/WidthDimension';
+import FadeEffect from './effects/FadeEffect';
+import Str from '../util/Str.js';
+import Collection from '../util/Collection';
 
 class Element {
 
@@ -11,49 +13,66 @@ class Element {
 
 		//Register a new Events instance for this element, so events are captured.
 		//But only on non-objects
-		if(!this.htmlElement.length) {
-			this.events = new Events(this);
+		if( this.isCollection() ) {
+			this.events = new Events(this, true);
 		}
+		else {
+		    this.events = new Events(this);
+        }
 	}
 
 	/**
 	 *
 	 * Returns the HTMLobject element that can be used
 	 *
-	 * @param {mixed}
+	 * @param {*} selector
 	 *
 	 * @private
 	 */
-	_select(selector) {
+	_select(selector, context = document) {
 
-		let returnElements = [];
+		let returnElements = new Collection();
 
 		if(!selector) {
 			return;
 		}
 
 		if(typeof selector == "string") {
-			var selectorType = "querySelectorAll";
 
 			if(selector.indexOf('#') == 0) {
 				//Selector is an ID
-				selectorType = 'getElementById';
-				selector = selector.substr(1, selector.length);
+				return context.getElementById(selector);
 			}
+			else {
+				let elements = context.querySelectorAll(selector);
 
-			return document[selectorType](selector);
-		}
-
-		if(selector.nodeType) {
-			//getElementById, document, document.body
-			return selector;
-		} else if (selector.length) {
-			//getElementsByClassName or getElementsByClassName
-			for(let i = 0; i < selector.length; i++) {
-				returnElements.push(new Element(selector[i]));
+				for(let i = 0; i < elements.length; i++) {
+					returnElements.push(new Element(elements[i]));
+				}
 			}
 		}
+		else {
+            if(selector.nodeType) {
+                //getElementById, document, document.body
+                return selector;
+            } else if (selector instanceof NodeList) {
+                //getElementsByClassName or getElementsByClass
+                for(let i = 0; i < selector.length; i++) {
+                    returnElements.push(new Element(selector[i]));
+                }
+            }
+        }
+
 		return returnElements;
+	}
+
+    /**
+	 * Returns whether the htmlElement is a collection (a set of elements)
+	 *
+	 * @return {boolean}
+     */
+	isCollection() {
+		return this.htmlElement instanceof Collection;
 	}
 
     /**
@@ -69,7 +88,7 @@ class Element {
      * 					Object: when returning the whole options object
      */
     getData(key) {
-        if(!this.htmlElement || this.htmlElement.length) {
+        if(!this.htmlElement || this.isCollection()) {
             return null;
         }
 
@@ -101,10 +120,10 @@ class Element {
 	 * @return {void}
 	 */
 	each(callback) {
-		if( typeof this.htmlElement == "object" ) {
-			for( let i = 0; i < this.htmlElement.length; i++ ) {
+		if( this.isCollection() ) {
+			for( let i = 0; i < this.htmlElement.length(); i++ ) {
 				if( typeof callback == 'function' ) {
-                    callback(new Element(this.htmlElement[i]), i);
+                    callback(new Element(this.htmlElement.get(i)), i);
 				}
 			}
 		} else {
@@ -117,10 +136,34 @@ class Element {
     /**
 	 * Gets the children for this element.
      * @returns {Element}
+	 *
+	 * @todo Needs cleaning up
      */
     children( selector )
 	{
-		return new Element(selector);
+		let returnChildren = new Collection();
+
+		if( this.isCollection() ) {
+			this.htmlElement.each((element, i) => {
+				let children = this._select(selector, element);
+
+				if(children instanceof Collection) {
+					for(let i = 0; i < children.length(); i++) {
+						returnChildren.push(new Element(children.get(i)));
+					}
+				}
+				else {
+					//child is a single HTMLelement
+					returnChildren.push(new Element(children))
+				}
+			})
+
+            return returnChildren;
+		}
+		else {
+		    return new Element(this._select(selector, this.htmlElement));
+        }
+
 	}
 
     /**
@@ -131,20 +174,39 @@ class Element {
 	 * @return {void}
      */
     addClass(className) {
-        if(this.htmlElement.className.length == 0) {
-            this.htmlElement.className = String(className);
-        } else if (this.htmlElement.className.indexOf(String(className)) == -1) {
-            this.htmlElement.className += " " + String(className);
+        console.log("yip");
+        if( this.isCollection() ) {
+            this.htmlElement.each(element => {
+                //recursively call for each element in the collection
+                console.log(element);
+                element.addClass(className);
+            })
+        }
+        else {
+            console.log("yup");
+            let hasClasses = this.htmlElement.getAttribute("class");
+
+            if(hasClasses.length == 0) {
+                this.htmlElement.setAttribute("class", className);
+            }
+            else if( hasClasses.indexOf(className) == -1) {
+                this.htmlElement.setAttribute("class", hasClasses + " " + className);
+            }
         }
     }
 
     /**
 	 * Checks whether the element has a specific class
 	 *
+     * @param {String} className The class the lement has to have
 	 * @return {boolean}
      */
     hasClass(className) {
-    	return this.htmlElement.className.indexOf(className) != -1;
+    	if( this.isCollection() ) {
+    	    return false;
+        }
+
+        return this.htmlElement.className.indexOf(className) != -1;
 	}
 
     /**
@@ -154,7 +216,7 @@ class Element {
      *
      */
 	getHeight() {
-		return new HeightDimension(this.htmlElement);
+		return new HeightDimension(this);
 	}
 
     /**
@@ -163,7 +225,7 @@ class Element {
 	 * @return {WidthDimension}
      */
 	getWidth() {
-		return new WidthDimension(this.htmlElement);
+		return new WidthDimension(this);
 	}
 
     /**
@@ -173,15 +235,64 @@ class Element {
      * @param {Function} callback
      */
 	on(ev, callback) {
-		if(typeof ev == 'object' ) {
-			for(let i = 0; i < ev.length; i++) {
-                this.events.add(ev[i], (event) => callback(new Element(this.htmlElement), event));
-			}
-		}
-		else {
+	    if( this.isCollection() ) {
+            if(typeof ev == 'object' ) {
+                for(let i = 0; i < ev.length; i++) {
+                    this.htmlElement.each((element) => {
+                        element.events.add(ev[i], (event) => callback(new Element(element.htmlElement), event));
+                    })
+                }
+            }
+        }
+        else {
             this.events.add(ev, (event) => callback(new Element(this.htmlElement), event));
-		}
+        }
 	}
+
+    /**
+     * Applies a css property to the element
+     *
+     * @param {*} Object: key-object notation of property-value
+	 * @param {}
+     *
+     * @return {void}
+     */
+    css() {
+        if(typeof arguments == 'object') {
+            for(let key in arguments[0]) {
+                this.htmlElement.style[key] = arguments[0][key];
+            }
+        } else if (typeof arguments[0] == 'string' && typeof arguments[1] == 'string') {
+            this.htmlElement.style[arguments[0]] = arguments[1];
+        }
+    }
+
+    /**
+	 * Fades the element out
+	 *
+     * @param {int} duration The duration of the effect in ms
+     * @param {function} callback The callback fired when the effect is finished
+     */
+	fadeOut(duration, callback) {
+
+		if(this.htmlElement instanceof Collection) {
+		    for(let i = 0; i < this.htmlElement.length(); i++) {
+		        new FadeEffect('out', 500, this.htmlElement.get(i));
+            }
+        }
+        else {
+            new FadeEffect('out', 500, this.htmlElement);
+        }
+	}
+
+	getRawElement() {
+	    if(!(this.htmlElement instanceof Collection)) {
+	        //element is a single element
+            return this.htmlElement;
+        }
+
+        return null;
+    }
 }
 
 export default Element;
