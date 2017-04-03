@@ -145,7 +145,7 @@ class Element {
 		let returnChildren = new Collection();
 
 		if( this.isCollection() ) {
-			this.htmlElement.each((element, i) => {
+			this.htmlElement.each(element => {
 				let children = this._select(selector, element);
 
 				if(children instanceof Collection) {
