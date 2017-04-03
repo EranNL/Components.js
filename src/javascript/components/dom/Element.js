@@ -174,16 +174,13 @@ class Element {
 	 * @return {void}
      */
     addClass(className) {
-        console.log("yip");
         if( this.isCollection() ) {
             this.htmlElement.each(element => {
                 //recursively call for each element in the collection
-                console.log(element);
                 element.addClass(className);
             })
         }
         else {
-            console.log("yup");
             let hasClasses = this.htmlElement.getAttribute("class");
 
             if(hasClasses.length == 0) {
@@ -206,7 +203,7 @@ class Element {
     	    return false;
         }
 
-        return this.htmlElement.className.indexOf(className) != -1;
+        return this.htmlElement.getAttribute("class").indexOf(className) != -1;
 	}
 
     /**
