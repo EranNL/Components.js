@@ -1,4 +1,4 @@
-import Str from "../helpers/Str.js";
+import Str from "../util/Str.js";
 import Element from "./Element.js";
 
 class Events {
