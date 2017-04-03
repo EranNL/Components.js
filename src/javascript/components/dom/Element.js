@@ -94,6 +94,7 @@ class Element {
 
         let returnData = {};
         let i = 0
+		//@todo: retrieve data from localStorage
 
         for(; i < this.htmlElement.attributes.length; i++) {
             let attribute = this.htmlElement.attributes[i];
@@ -255,12 +256,19 @@ class Element {
      * @return {void}
      */
     css() {
-        if(typeof arguments == 'object') {
-            for(let key in arguments[0]) {
-                this.htmlElement.style[key] = arguments[0][key];
+        if( this.isCollection() ) {
+            this.htmlElement.each(element => {
+                element.css(arguments);
+            })
+        }
+        else {
+            if(typeof arguments == 'object') {
+                for(let key in arguments[0]) {
+                    this.htmlElement.style[key] = arguments[0][key];
+                }
+            } else if (typeof arguments[0] == 'string' && typeof arguments[1] == 'string') {
+                this.htmlElement.style[arguments[0]] = arguments[1];
             }
-        } else if (typeof arguments[0] == 'string' && typeof arguments[1] == 'string') {
-            this.htmlElement.style[arguments[0]] = arguments[1];
         }
     }
 
