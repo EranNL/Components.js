@@ -166,7 +166,7 @@ class Element {
             return returnChildren;
 		}
 		else {
-		    return new Element(this._select(selector, this.htmlElement));
+		    return this._select(selector, this.htmlElement);
         }
 
 	}
