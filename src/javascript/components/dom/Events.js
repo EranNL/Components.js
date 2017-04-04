@@ -6,9 +6,26 @@ class Events {
 	constructor(instance) {
 		this.instance = instance;
         this.element = this.instance instanceof Element ? this.instance.htmlElement : this.instance.element.htmlElement;
+		this.events = [];
+
+		this.getDOMEvents();
 
 		this.attachEvents();
 	}
+
+    /**
+	 * Gets a list of possible DOM events
+	 *
+	 * @return {void}
+     */
+    getDOMEvents() {
+    	for(event in document.__proto__) {
+    		if(event.substr(0, 2) === 'on') {
+    			this.events.push(event.substr(0, 2) + Str.ucFirst(event.substr(2, event.length)));
+			}
+		}
+	}
+
 
 	/**
 	 * Check whether a function exists in the class where this instance is called
@@ -29,13 +46,11 @@ class Events {
 	 * @return {void}
 	 */
 	attachEvents() {
-		Object.keys(Event.prototype).forEach((ev) => {
-			let e = Str.toCamelCase('on ' + ev);
-			if(this._functionExists(e)) {
-				this.add(ev.toLowerCase(), () => this.instance.__proto__[e].apply(this.instance, [this.element, event]));
+		for(let i = 0; i < this.events.length; i++) {
+			if(this._functionExists(this.events[i])) {
+				this.add(this.events[i].substr(2, this.events[i].length).toLowerCase(), () => this.instance.__proto__[this.events[i]].apply(this.instance, [this.element, event]));
 			}
-
-    	});
+    	}
 	}
 
     /**
