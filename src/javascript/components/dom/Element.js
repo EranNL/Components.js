@@ -13,7 +13,7 @@ class Element {
 
 		//Register a new Events instance for this element, so events are captured.
 		//But only on non-objects
-		if( this.isCollection() ) {
+		if( !this.isCollection() ) {
 			this.events = new Events(this, true);
 		}
 		else {
@@ -37,6 +37,10 @@ class Element {
 			return;
 		}
 
+		if(context instanceof Element) {
+			context = context.htmlElement;
+		}
+
 		if(typeof selector == "string") {
 
 			if(selector.indexOf('#') == 0) {
@@ -44,12 +48,13 @@ class Element {
 				return context.getElementById(selector);
 			}
 			else {
-				let elements = context.querySelectorAll(selector);
+                let elements = context.querySelectorAll(selector);
 
-				for(let i = 0; i < elements.length; i++) {
-					returnElements.push(new Element(elements[i]));
-				}
-			}
+                for (let i = 0; i < elements.length; i++) {
+                    returnElements.push(new Element(elements[i]));
+                }
+                return returnElements;
+            }
 		}
 		else {
             if(selector.nodeType) {
@@ -60,10 +65,9 @@ class Element {
                 for(let i = 0; i < selector.length; i++) {
                     returnElements.push(new Element(selector[i]));
                 }
+                return returnElements;
             }
         }
-
-		return returnElements;
 	}
 
     /**
@@ -140,17 +144,17 @@ class Element {
 	 *
 	 * @todo Needs cleaning up
      */
-    children( selector )
+    children( selector = "*")
 	{
 		let returnChildren = new Collection();
 
 		if( this.isCollection() ) {
 			this.htmlElement.each(element => {
-				let children = this._select(selector, element);
+				let children = this._select(selector, element.htmlElement);
 
 				if(children instanceof Collection) {
 					for(let i = 0; i < children.length(); i++) {
-						returnChildren.push(new Element(children.get(i)));
+						returnChildren.push(children.get(i));
 					}
 				}
 				else {
