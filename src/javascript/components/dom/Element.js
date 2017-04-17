@@ -33,36 +33,36 @@ class Element {
 
 		let returnElements = new Collection();
 
-		if(!selector) {
+		if( !selector ) {
 			return;
 		}
 
-		if(context instanceof Element) {
+		if( context instanceof Element ) {
 			context = context.htmlElement;
 		}
 
-		if(typeof selector == "string") {
+		if( typeof selector == "string" ) {
 
-			if(selector.indexOf('#') == 0) {
+			if( selector.indexOf('#') == 0 ) {
 				//Selector is an ID
 				return context.getElementById(selector);
 			}
 			else {
                 let elements = context.querySelectorAll(selector);
 
-                for (let i = 0; i < elements.length; i++) {
+                for ( let i = 0; i < elements.length; i++ ) {
                     returnElements.push(new Element(elements[i]));
                 }
                 return returnElements;
             }
 		}
 		else {
-            if(selector.nodeType) {
+            if( selector.nodeType ) {
                 //getElementById, document, document.body
                 return selector;
-            } else if (selector instanceof NodeList) {
+            } else if( selector instanceof NodeList ) {
                 //getElementsByClassName or getElementsByClass
-                for(let i = 0; i < selector.length; i++) {
+                for( let i = 0; i < selector.length; i++ ) {
                     returnElements.push(new Element(selector[i]));
                 }
                 return returnElements;
@@ -88,19 +88,18 @@ class Element {
      * @param {String} key (optional) The specific value of a attribute key that has to be returned
      *
      * @return {*} 	null: when not a specific element |
-     * 				   	String: when a key is specified |
-     * 					Object: when returning the whole options object
+     * 				String: when a key is specified |
+     * 				Object: when returning the whole options object
      */
     getData(key) {
-        if(!this.htmlElement || this.isCollection()) {
+        if( !this.htmlElement || this.isCollection() ) {
             return null;
         }
 
         let returnData = {};
-        let i = 0
 		//@todo: retrieve data from localStorage
 
-        for(; i < this.htmlElement.attributes.length; i++) {
+        for( let i = 0; i < this.htmlElement.attributes.length; i++ ) {
             let attribute = this.htmlElement.attributes[i];
 
             if(attribute.name.indexOf('data-') == 0) {
@@ -110,7 +109,7 @@ class Element {
             }
         }
 
-        if(key) {
+        if( key ) {
             return returnData[key] || "";
         }
 
@@ -128,11 +127,11 @@ class Element {
 		if( this.isCollection() ) {
 			for( let i = 0; i < this.htmlElement.length(); i++ ) {
 				if( typeof callback == 'function' ) {
-                    callback(new Element(this.htmlElement.get(i)), i);
+                    callback(this.htmlElement.get(i), i);
 				}
 			}
 		} else {
-			if( typeof callback == 'function') {
+			if( typeof callback == 'function' ) {
                 callback(new Element(this.htmlElement), 0);
 			}
 		}
@@ -144,7 +143,7 @@ class Element {
 	 *
 	 * @todo Needs cleaning up
      */
-    children( selector = "*")
+    children(selector = "*")
 	{
 		let returnChildren = new Collection();
 
@@ -152,8 +151,8 @@ class Element {
 			this.htmlElement.each(element => {
 				let children = this._select(selector, element.htmlElement);
 
-				if(children instanceof Collection) {
-					for(let i = 0; i < children.length(); i++) {
+				if( children instanceof Collection ) {
+					for( let i = 0; i < children.length(); i++ ) {
 						returnChildren.push(children.get(i));
 					}
 				}
@@ -245,6 +244,11 @@ class Element {
                     })
                 }
             }
+            else {
+                this.htmlElement.each(element => {
+                    element.events.add(ev, (event) => callback(new Element(element.htmlElement), event));
+                })
+            }
         }
         else {
             this.events.add(ev, (event) => callback(new Element(this.htmlElement), event));
@@ -274,6 +278,8 @@ class Element {
                 this.htmlElement.style[arguments[0]] = arguments[1];
             }
         }
+
+        return this;
     }
 
     /**
@@ -295,7 +301,7 @@ class Element {
 	}
 
 	getRawElement() {
-	    if(!(this.htmlElement instanceof Collection)) {
+	    if( !(this.htmlElement instanceof Collection) ) {
 	        //element is a single element
             return this.htmlElement;
         }
