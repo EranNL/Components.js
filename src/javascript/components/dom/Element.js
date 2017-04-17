@@ -60,7 +60,7 @@ class Element {
             if( selector.nodeType ) {
                 //getElementById, document, document.body
                 return selector;
-            } else if( selector instanceof NodeList ) {
+            } else if( selector instanceof NodeList || selector instanceof HTMLCollection ) {
                 //getElementsByClassName or getElementsByClass
                 for( let i = 0; i < selector.length; i++ ) {
                     returnElements.push(new Element(selector[i]));
