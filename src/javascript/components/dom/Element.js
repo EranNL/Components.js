@@ -71,6 +71,17 @@ class Element {
 	}
 
     /**
+     * Create an element in the DOM. The element can be seen after appending it to an other element
+     * @param {String} element The node that has to be created
+     * @return {Element}
+     */
+	static create(element) {
+	    if(typeof element === 'string') {
+	        return new Element(document.createElement(element));
+        }
+    }
+
+    /**
 	 * Returns whether the htmlElement is a collection (a set of elements)
 	 *
 	 * @return {boolean}
