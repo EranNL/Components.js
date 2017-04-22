@@ -82,6 +82,42 @@ class Element {
     }
 
     /**
+     * Appends a htmlElement to this htmlElement
+     * @param {String} toBeAppended
+     */
+    append(toBeAppended) {
+        if( this.isCollection() ) {
+            this.htmlElement.each( element => {
+                element.append(toBeAppended);
+            });
+
+            return this;
+        }
+        else {
+            if( toBeAppended instanceof Element ) {
+                if(toBeAppended.isCollection()) {
+                    let html = '';
+                    toBeAppended.htmlElement.each(element => {
+                        html += element.htmlElement.outerHTML;
+                    })
+                    this.htmlElement.innerHTML += html;
+                }
+                else {
+                    this.htmlElement.innerHTML += toBeAppended.htmlElement.outerHTML;
+                }
+
+            }
+            else {
+                //make a pseudo element for easy appending and to prevent code duplication
+                toBeAppended = new Element(toBeAppended);
+                this.append(toBeAppended);
+            }
+
+            return this;
+        }
+    }
+
+    /**
 	 * Returns whether the htmlElement is a collection (a set of elements)
 	 *
 	 * @return {boolean}
