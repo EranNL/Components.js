@@ -9,16 +9,12 @@ class Element {
 
 	constructor(element = ""){
 		this.htmlElement = this._select(element);
-		//this.options = this.data();
 
 		//Register a new Events instance for this element, so events are captured.
 		//But only on non-objects
 		if( !this.isCollection() ) {
-			this.events = new Events(this, true);
+			this.events = new Events(this);
 		}
-		else {
-		    this.events = new Events(this);
-        }
 	}
 
 	/**
@@ -82,8 +78,10 @@ class Element {
     }
 
     /**
-     * Appends a htmlElement to this htmlElement
-     * @param {String} toBeAppended
+     * Appends a htmlElement to the end of this html element
+     * @param {*} toBeAppended The element/ selector that has to be appended
+     * @return {Element}
+     * @todo Delete appended element?
      */
     append(toBeAppended) {
         if( this.isCollection() ) {
@@ -107,13 +105,52 @@ class Element {
                 }
 
             }
+            else if(typeof toBeAppended === 'string') {
+                this.htmlElement.innerHTML += toBeAppended;
+            }
             else {
-                //make a pseudo element for easy appending and to prevent code duplication
                 toBeAppended = new Element(toBeAppended);
                 this.append(toBeAppended);
             }
 
             return this;
+        }
+    }
+
+    prepend(toBePrepended) {
+        if( toBePrepended instanceof Element ) {
+            if(toBePrepended.isCollection()) {
+                let html = '';
+                toBePrepended.htmlElement.each(element => {
+                    html += element.htmlElement.outerHTML;
+                })
+                this.htmlElement.innerHTML = html + this.htmlElement.innerHTML;
+            }
+            else {
+                this.htmlElement.innerHTML = toBePrepended.htmlElement.outerHTML + this.htmlElement.innerHTML;
+            }
+
+        }
+        else if(typeof toBePrepended === 'string') {
+            this.htmlElement.innerHTML += toBePrepended;
+        }
+        else {
+            toBePrepended = new Element(toBePrepended);
+            this.append(toBePrepended);
+        }
+    }
+
+    /**
+     * Removes this elememt
+     */
+    remove() {
+        if(this.isCollection()) {
+            this.htmlElement.each(element => {
+                element.remove();
+            });
+        }
+        else {
+            this.htmlElement.parentNode.removeChild(this.htmlElement);
         }
     }
 
@@ -300,6 +337,8 @@ class Element {
         else {
             this.events.add(ev, (event) => callback(new Element(this.htmlElement), event));
         }
+
+        return this;
 	}
 
     /**
