@@ -140,6 +140,19 @@ class Element {
         }
     }
 
+    appendTo(selector) {
+        if(selector instanceof Element) {
+            if(selector.isCollection()) {
+                selector.each(element => {
+                    element.append(this.htmlElement);
+                });
+            }
+        }
+        else {
+            new Element(selector).append(this);
+        }
+    }
+
     /**
      * Removes this elememt
      */
@@ -270,14 +283,17 @@ class Element {
         }
         else {
             let hasClasses = this.htmlElement.getAttribute("class");
+            console.log(hasClasses);
 
-            if(hasClasses.length == 0) {
+            if( hasClasses === null || hasClasses.length == 0) {
                 this.htmlElement.setAttribute("class", className);
             }
             else if( hasClasses.indexOf(className) == -1) {
                 this.htmlElement.setAttribute("class", hasClasses + " " + className);
             }
         }
+
+        return this;
     }
 
     /**
