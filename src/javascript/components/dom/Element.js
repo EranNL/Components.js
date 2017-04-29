@@ -37,11 +37,18 @@ class Element {
 			context = context.htmlElement;
 		}
 
+		if ( selector instanceof Collection ) {
+		    //asssume that it is a collection of htmlElements
+		    return selector.filter(element => {
+		        return element instanceof Element;
+            });
+        }
+
 		if( typeof selector == "string" ) {
 
 			if( selector.indexOf('#') == 0 ) {
 				//Selector is an ID
-				return context.getElementById(selector);
+				return context.getElementById(selector.substr(1, selector.length));
 			}
 			else {
                 let elements = context.querySelectorAll(selector);
@@ -199,7 +206,7 @@ class Element {
         for( let i = 0; i < this.htmlElement.attributes.length; i++ ) {
             let attribute = this.htmlElement.attributes[i];
 
-            if(attribute.name.indexOf('data-') == 0) {
+            if( attribute.name.indexOf('data-') == 0 ) {
                 let name = attribute.name.substr("data-".length, attribute.name.length - 1);
 
                 returnData[name] = /{.*}/g.test(attribute.value) ? Str.toObject(attribute.value) : attribute.value;
@@ -268,11 +275,48 @@ class Element {
 	}
 
     /**
+     * Checks whether the element, based on the tagname, class or id, matches a given string
+     * @param selector
+     * @return {boolean}
+     * @todo more global match?
+     */
+	matches(selector) {
+        if( !this.isCollection() ) {
+            let match = false;
+            if (selector.indexOf('#') == 0) {
+                //match by id
+                match = this.htmlElement.id == selector.substr(1, selector.length) ? true : false;
+            }
+            else if (selector.indexOf('.') == 0) {
+                match = this.hasClass(selector.substr(1, selector.length));
+            }
+            else if (this.htmlElement.tagName == selector) {
+                match = true;
+            }
+
+            return match;
+        }
+        else {
+            return this.htmlElement.get(0).matches(selector);
+        }
+    }
+
+	find(selector) {
+        if( typeof selector == 'string' ) {
+            let children = this.children(selector).filter(element => {
+                return element.matches(selector);
+            });
+
+            return new Element(children);
+        }
+    }
+
+    /**
      * Adds an class to the element
 	 *
 	 * @param {String} className The name of the class youd like to add
 	 *
-	 * @return {void}
+	 * @return {Element}
      */
     addClass(className) {
         if( this.isCollection() ) {
@@ -283,7 +327,6 @@ class Element {
         }
         else {
             let hasClasses = this.htmlElement.getAttribute("class");
-            console.log(hasClasses);
 
             if( hasClasses === null || hasClasses.length == 0) {
                 this.htmlElement.setAttribute("class", className);
@@ -334,6 +377,7 @@ class Element {
      * @param {*} ev String: The name of the event
      *               Array: List of events
      * @param {Function} callback
+     * @return {Element}
      */
 	on(ev, callback) {
 	    if( this.isCollection() ) {
@@ -361,9 +405,9 @@ class Element {
      * Applies a css property to the element
      *
      * @param {*} Object: key-object notation of property-value
-	 * @param {}
+     *            String, String: The property and value of the to be applied css
      *
-     * @return {void}
+     * @return {Element}
      */
     css() {
         if( this.isCollection() ) {
@@ -372,7 +416,7 @@ class Element {
             })
         }
         else {
-            if(typeof arguments == 'object') {
+            if( typeof arguments == 'object' ) {
                 for(let key in arguments[0]) {
                     this.htmlElement.style[key] = arguments[0][key];
                 }
@@ -402,6 +446,11 @@ class Element {
         }
 	}
 
+    /**
+     *
+     * @return {*} htmlElement: The raw html element
+     *             null:        The htmlElement was a collection. Nothing returned
+     */
 	getRawElement() {
 	    if( !(this.htmlElement instanceof Collection) ) {
 	        //element is a single element
