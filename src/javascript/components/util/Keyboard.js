@@ -10,7 +10,6 @@ class Keyboard {
         } else {
             element = instance.element;
         }
-        console.log(element);
 
         element.events.add('keydown', (event) => {
             for( let key in keyMap ) {
@@ -36,7 +35,8 @@ class Keyboard {
 Keyboard.KEYS = {
     8: 'BACKSPACE',
     9: 'TAB',
-    13: 'ENTER'
+    13: 'ENTER',
+    27: 'ESC'
 };
 
 export default Keyboard;
