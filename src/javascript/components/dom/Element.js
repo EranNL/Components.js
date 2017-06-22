@@ -2,6 +2,7 @@ import Events from './Events.js';
 import HeightDimension from './dimensions/HeightDimension';
 import WidthDimension from './dimensions/WidthDimension';
 import FadeEffect from './effects/FadeEffect';
+import SlideEffect from './effects/SlideEffect';
 import Str from '../util/Str.js';
 import Collection from '../util/Collection';
 
@@ -154,10 +155,15 @@ class Element {
                     element.append(this.htmlElement);
                 });
             }
+            else {
+                selector.append(this.htmlElement);
+            }
         }
         else {
             new Element(selector).append(this);
         }
+
+        return this;
     }
 
     /**
@@ -275,37 +281,40 @@ class Element {
 	}
 
     /**
-     * Checks whether the element, based on the tagname, class or id, matches a given string
-     * @param selector
-     * @return {boolean}
-     * @todo more global match?
+     * Checks whether the element(s) match(es) a specific selector
+     * @param {string} selector The selector to be matched
+     * @return {boolean} True: The selector matches the (set of) element(s)
      */
 	matches(selector) {
-        if( !this.isCollection() ) {
-            let match = false;
-            if (selector.indexOf('#') == 0) {
-                //match by id
-                match = this.htmlElement.id == selector.substr(1, selector.length) ? true : false;
-            }
-            else if (selector.indexOf('.') == 0) {
-                match = this.hasClass(selector.substr(1, selector.length));
-            }
-            else if (this.htmlElement.tagName == selector) {
-                match = true;
-            }
+	    let matchesElements = true;
 
-            return match;
+	    let match = function(element) {
+            let matches = (window.document || window.ownerDocument).querySelectorAll(selector),
+                i = matches.length;
+
+            while (--i >= 0 && matches[i] !== (element instanceof Element ? element.getRawElement() : element)) {}
+            return i > -1;
+        }
+	    if(this.isCollection()) {
+	        this.htmlElement.each((element) => {
+	            if(!match(element)) {
+	                matchesElements = false;
+                }
+            })
         }
         else {
-            return this.htmlElement.get(0).matches(selector);
+	        matchesElements = match(this.getRawElement());
         }
+
+        return matchesElements;
     }
 
 	find(selector) {
         if( typeof selector == 'string' ) {
-            let children = this.children(selector).filter(element => {
-                return element.matches(selector);
-            });
+            let children = this.children(selector)
+            //     .filter(element => {
+            //     return element.matches(selector);
+            // });
 
             return new Element(children);
         }
@@ -384,18 +393,18 @@ class Element {
             if(typeof ev == 'object' ) {
                 for(let i = 0; i < ev.length; i++) {
                     this.htmlElement.each(element => {
-                        element.events.add(ev[i], (event) => callback(new Element(element.htmlElement), event));
+                        element.events.add(ev[i], (event) => callback(element, event));
                     })
                 }
             }
             else {
                 this.htmlElement.each(element => {
-                    element.events.add(ev, (event) => callback(new Element(element.htmlElement), event));
+                    element.events.add(ev, (event) => callback(element, event));
                 })
             }
         }
         else {
-            this.events.add(ev, (event) => callback(new Element(this.htmlElement), event));
+            this.events.add(ev, (event) => callback(new Element(this.htmlElement), event), selector);
         }
 
         return this;
@@ -408,8 +417,15 @@ class Element {
      *            String, String: The property and value of the to be applied css
      *
      * @return {Element}
+     *
+     * @Todo Fix CSS properties by argument, instead of object
      */
     css() {
+        if(arguments.length === 1 && typeof arguments[0] == 'string') {
+            let element = this.isCollection() ? this.htmlElement.get(0).getRawElement() : this.getRawElement();
+            return window.getComputedStyle(element)[arguments[0]];
+        }
+
         if( this.isCollection() ) {
             this.htmlElement.each(element => {
                 element.css(arguments);
@@ -420,7 +436,8 @@ class Element {
                 for(let key in arguments[0]) {
                     this.htmlElement.style[key] = arguments[0][key];
                 }
-            } else if (typeof arguments[0] == 'string' && typeof arguments[1] == 'string') {
+            }
+            else if(arguments.length === 2 && typeof arguments[0] === 'string' && typeof arguments[1] === 'string') {
                 this.htmlElement.style[arguments[0]] = arguments[1];
             }
         }
@@ -429,22 +446,57 @@ class Element {
     }
 
     /**
+     * Quick fix to set the display of the element to 'block'
+     *
+     * @todo perhaps add animations
+     */
+    show() {
+        this.css({display: 'block'});
+    }
+
+    /**
 	 * Fades the element out
 	 *
      * @param {int} duration The duration of the effect in ms
      * @param {function} callback The callback fired when the effect is finished
      */
-	fadeOut(duration, callback) {
-
-		if(this.htmlElement instanceof Collection) {
+	fadeOut(duration = 500, easing = null, callback)
+    {
+		if(this.isCollection()) {
 		    for(let i = 0; i < this.htmlElement.length(); i++) {
-		        new FadeEffect('out', 500, this.htmlElement.get(i));
+		        new FadeEffect('out', duration, this.htmlElement.get(i).getRawElement(), easing);
             }
         }
         else {
-            new FadeEffect('out', 500, this.htmlElement);
+            new FadeEffect('out', duration, this.htmlElement, easing);
         }
 	}
+
+	slideLeft(duration = 500, easing = null, callback) {
+        if(this.isCollection()) {
+            for(let i = 0; i < this.htmlElement.length(); i++) {
+                new SlideEffect('left', duration, this.htmlElement.get(i).getRawElement(), easing);
+            }
+        }
+        else {
+            let effect = new SlideEffect('left', duration, this.htmlElement, easing);
+        }
+    }
+
+    slideUp(duration = 500, easing = null, callback) {
+        if(this.isCollection()) {
+            for(let i = 0; i < this.htmlElement.length(); i++) {
+                this.htmlElement.get(i).css('height', '2000px');
+                new SlideEffect('up', duration, this.htmlElement.get(i).getRawElement(), easing);
+            }
+        }
+        else {
+            this.css({overflow: 'hidden'});
+            let effect = new SlideEffect('up', duration, this.htmlElement, easing);
+
+            console.log(effect.hasFinished);
+        }
+    }
 
     /**
      *
@@ -458,6 +510,10 @@ class Element {
         }
 
         return null;
+    }
+
+    isHidden() {
+
     }
 }
 
