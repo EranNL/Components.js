@@ -29,7 +29,7 @@ class Str {
 	 *
 	 * @return {Object}
      */
-	static toObject() {
+	static toObject(string) {
         string = string.replace(/'/g, '"');
         try {
             return JSON.parse(string);
