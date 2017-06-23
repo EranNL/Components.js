@@ -89,7 +89,7 @@ class Element {
      * Appends a htmlElement to the end of this html element
      * @param {*} toBeAppended The element/ selector that has to be appended
      * @return {Element}
-     * @todo Delete appended element?
+     * @todo CLEAN UP!
      */
     append(toBeAppended) {
         if( this.isCollection() ) {
@@ -102,19 +102,32 @@ class Element {
         else {
             if( toBeAppended instanceof Element ) {
                 if(toBeAppended.isCollection()) {
-                    let html = '';
+                    let html = document.createElement('div');
                     toBeAppended.htmlElement.each(element => {
-                        html += element.htmlElement.outerHTML;
+                        html.innterHtml += element.htmlElement.outerHTML;
                     })
-                    this.htmlElement.innerHTML += html;
+
+                    while(html.firstChild) {
+                        this.htmlElement.appendChild(html.firstChild)
+                    }
                 }
                 else {
-                    this.htmlElement.innerHTML += toBeAppended.htmlElement.outerHTML;
+                    let html = document.createElement('div');
+                    html.innerHTML += toBeAppended.htmlElement.outerHTML;
+
+                    while(html.firstChild) {
+                        this.htmlElement.appendChild(html.firstChild);
+                    }
                 }
 
             }
             else if(typeof toBeAppended === 'string') {
-                this.htmlElement.innerHTML += toBeAppended;
+                let html = document.createElement('div');
+                html.innerHTML += toBeAppended;
+
+                while(html.firstChild) {
+                    this.htmlElement.appendChild(html.firstChild);
+                }
             }
             else {
                 toBeAppended = new Element(toBeAppended);
@@ -125,6 +138,30 @@ class Element {
         }
     }
 
+    before(target) {
+        if(this.isCollection()) {
+            return;
+        }
+
+        if(target instanceof Element) {
+            if(target.isCollection()) {
+                target.htmlElement.each(element => {
+                    element.before(this)
+                })
+            }
+            else {
+                target.htmlElement.parentNode.appendChild(this.htmlElement);
+            }
+        }
+
+    }
+
+    /**
+     * Adds an element as the first childnode of this element
+     * @param {*} toBePrepended
+     *
+     * @todo: fix events
+     */
     prepend(toBePrepended) {
         if( toBePrepended instanceof Element ) {
             if(toBePrepended.isCollection()) {
@@ -178,6 +215,19 @@ class Element {
         else {
             this.htmlElement.parentNode.removeChild(this.htmlElement);
         }
+    }
+
+    attr(attr, value) {
+        if(this.isCollection()) {
+            this.htmlElement.each(element => {
+                element.setAttr(attr, value);
+            })
+        }
+        else {
+            this.htmlElement.setAttribute(attr, value);
+        }
+
+        return this;
     }
 
     /**
@@ -388,18 +438,23 @@ class Element {
      * @param {Function} callback
      * @return {Element}
      */
-	on(ev, callback) {
+	on(ev, selector, callback) {
+	    if(typeof selector == 'function') {
+	        callback = selector;
+	        selector = null;
+        }
+
 	    if( this.isCollection() ) {
             if(typeof ev == 'object' ) {
                 for(let i = 0; i < ev.length; i++) {
                     this.htmlElement.each(element => {
-                        element.events.add(ev[i], (event) => callback(element, event));
+                        element.events.add(ev[i], (event) => callback(element, event), selector);
                     })
                 }
             }
             else {
                 this.htmlElement.each(element => {
-                    element.events.add(ev, (event) => callback(element, event));
+                    element.events.add(ev, (event) => callback(element, event), selector);
                 })
             }
         }
@@ -454,6 +509,10 @@ class Element {
         this.css({display: 'block'});
     }
 
+    hide() {
+        this.css({display: 'none'});
+    }
+
     /**
 	 * Fades the element out
 	 *
@@ -493,8 +552,6 @@ class Element {
         else {
             this.css({overflow: 'hidden'});
             let effect = new SlideEffect('up', duration, this.htmlElement, easing);
-
-            console.log(effect.hasFinished);
         }
     }
 
