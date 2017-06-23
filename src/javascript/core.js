@@ -12,7 +12,7 @@ import Keyboard from "./components/util/Keyboard";
 
 "use strict";
 
-window.componentList = {};
+window.componentList = {'components': {}, 'directives': {}};
 
 class Components {
 
@@ -21,7 +21,7 @@ class Components {
 	 *
 	 * @todo: Improve!!!
 	 */
-	constructor(element, init) {
+	constructor(element, init = false) {
 		 if( init ) {
              this.context = new Element(element);
 		 }
@@ -36,10 +36,16 @@ class Components {
      * @param {String} name The name of the plugin
      */
 	static registerComponent(instance, name) {
-		if( componentList[name] === undefined ) {
-			componentList[name] = instance;
+		if( componentList['components'][name] === undefined ) {
+			componentList['components'][name] = instance;
 		}
 	}
+
+	static registerDirective(instance, name) {
+        if( componentList['directives'][name] === undefined ) {
+            componentList['directives'][name] = instance;
+        }
+    }
 
     /**
 	 * Static method to register events to a custom plugin
@@ -56,25 +62,53 @@ class Components {
 	 * @return {void}
 	 */
 	init() {
-		this.context.children('[data-component]').each(element => {
-			let com = element.getData('component').split(' ');
-			let i = 0;
+        let functionMap = {};
+		this.context.children('[data-component], [data-directive]').each(element => {
 
-			for(; i < com.length; i++) {
-				try {
-                    let component = require('./components/' + Str.ucFirst(com[i]) + '.js').default;
-                    new component(element);
-				}
-				catch ( err ) {
-					//no module was found, try to fetch it from the array
-					if( componentList[com[i]] !== undefined ) {
-						new componentList[com[i]](element, Components);
-					}
-					else {
-                        console.error(err);
-					    console.error('Module ' + com[i] + 'was not found. Does it exist?');
+			functionMap['components'] = element.getData('component').split(' ');
+
+			if( element.getData('directive') ) functionMap['directives'] = element.getData('directive').split(' ');
+
+			for(let name in functionMap) {
+			    //loop through the array that "key" holds
+			    for(let i = 0; i < functionMap[name].length; i++) {
+
+			        //@TODO: fix weird empty component,
+			        if(!functionMap[name][i]) {
+			            continue;
                     }
-				}
+
+			        let componentTree = null;
+
+			        if(/.+[\.].+/.test(functionMap[name][i])) {
+			            let tree = functionMap[name][i].split('.');
+                        tree[tree.length - 1] = Str.ucFirst(tree[tree.length - 1]);
+
+                        componentTree = (name !== 'components' ? name + '/' : '') +
+						tree.join('/') +
+                            Str.ucFirst(name.substr(0, name.length - 1));
+                    }
+                    else {
+                        componentTree = (name !== 'components' ? name + '/' : '') +
+                            Str.ucFirst(functionMap[name][i]) +
+                            (name !== 'components' ? Str.ucFirst(name.substr(0, name.length - 1)) : '');
+                    }
+
+                    try {
+                        let component = require('./framework/' + componentTree + '.js').default;
+                        new component(element);
+                    }
+                    catch ( err ) {
+                        //no module was found, try to fetch it from the array
+                        if( componentList[name][functionMap[name][i]] !== undefined ) {
+                            new componentList[name][functionMap[name][i]](element, Components);
+                        }
+                        else {
+                            console.error(err);
+                            console.error('Module ' + functionMap[name][i] + ' was not found. Does it exist?');
+                        }
+                    }
+                }
             }
 		})
 	}
