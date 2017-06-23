@@ -5,7 +5,7 @@ class Events {
 
 	constructor(instance) {
 		this.instance = instance;
-        this.element = this.instance instanceof Element ? this.instance.htmlElement : this.instance.element.htmlElement;
+        this.element = this.instance instanceof Element ? this.instance : this.instance.element;
 		this.events = [];
 
 		this.getDOMEvents();
@@ -48,7 +48,7 @@ class Events {
 	attachEvents() {
 		for( let i = 0; i < this.events.length; i++ ) {
 			if( this._functionExists(this.events[i]) ) {
-				this.add(this.events[i].substr(2, this.events[i].length).toLowerCase(), () => this.instance.__proto__[this.events[i]].apply(this.instance, [this.element, event]));
+				this.add(this.events[i].substr(2, this.events[i].length).toLowerCase(), () => this.instance.__proto__[this.events[i]].apply(this.instance, [this.element.htmlElement, event]));
 			}
     	}
 	}
@@ -61,8 +61,19 @@ class Events {
 	 *
 	 * @return {void}
      */
-    add(ev, callback) {
-        this.element.addEventListener(ev, callback)
+    add(ev, callback, selector = null) {
+		if(selector) {
+            this.element.htmlElement.addEventListener(ev, (event) => {
+                if(new Element(event.target).matches(selector)) {
+                    callback();
+                }
+            })
+        }
+        else {
+			if(this.element.htmlElement.addEventListener) {
+                this.element.htmlElement.addEventListener(ev, callback)
+			}
+		}
 	}
 }
 
