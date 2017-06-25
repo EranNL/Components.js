@@ -217,7 +217,16 @@ class Element {
         }
     }
 
-    attr(attr, value) {
+    attr(attr, value = null) {
+        if(value === null) {
+            if(this.isCollection()) {
+                return this.htmlElement.get(0).htmlElement.getAttribute(attr);
+            }
+            else {
+                return this.htmlElement.getAttribute(attr);
+            }
+        }
+
         if(this.isCollection()) {
             this.htmlElement.each(element => {
                 element.setAttr(attr, value);
@@ -342,7 +351,7 @@ class Element {
             let matches = (window.document || window.ownerDocument).querySelectorAll(selector),
                 i = matches.length;
 
-            while (--i >= 0 && matches[i] !== (element instanceof Element ? element.getRawElement() : element)) {}
+            while (--i >= 0 && matches[i] !== (element instanceof Element ? element.htmlElement : element)) {}
             return i > -1;
         }
 	    if(this.isCollection()) {
@@ -353,7 +362,7 @@ class Element {
             })
         }
         else {
-	        matchesElements = match(this.getRawElement());
+	        return match(this.htmlElement);
         }
 
         return matchesElements;
@@ -477,7 +486,7 @@ class Element {
      */
     css() {
         if(arguments.length === 1 && typeof arguments[0] == 'string') {
-            let element = this.isCollection() ? this.htmlElement.get(0).getRawElement() : this.getRawElement();
+            let element = this.isCollection() ? this.htmlElement.get(0).htmlElement : this.htmlElement;
             return window.getComputedStyle(element)[arguments[0]];
         }
 
@@ -523,7 +532,7 @@ class Element {
     {
 		if(this.isCollection()) {
 		    for(let i = 0; i < this.htmlElement.length(); i++) {
-		        new FadeEffect('out', duration, this.htmlElement.get(i).getRawElement(), easing);
+		        new FadeEffect('out', duration, this.htmlElement.get(i).htmlElement, easing);
             }
         }
         else {
@@ -534,7 +543,7 @@ class Element {
 	slideLeft(duration = 500, easing = null, callback) {
         if(this.isCollection()) {
             for(let i = 0; i < this.htmlElement.length(); i++) {
-                new SlideEffect('left', duration, this.htmlElement.get(i).getRawElement(), easing);
+                new SlideEffect('left', duration, this.htmlElement.get(i).htmlElement, easing);
             }
         }
         else {
@@ -546,27 +555,13 @@ class Element {
         if(this.isCollection()) {
             for(let i = 0; i < this.htmlElement.length(); i++) {
                 this.htmlElement.get(i).css('height', '2000px');
-                new SlideEffect('up', duration, this.htmlElement.get(i).getRawElement(), easing);
+                new SlideEffect('up', duration, this.htmlElement.get(i).htmlElement, easing);
             }
         }
         else {
             this.css({overflow: 'hidden'});
             let effect = new SlideEffect('up', duration, this.htmlElement, easing);
         }
-    }
-
-    /**
-     *
-     * @return {*} htmlElement: The raw html element
-     *             null:        The htmlElement was a collection. Nothing returned
-     */
-	getRawElement() {
-	    if( !(this.htmlElement instanceof Collection) ) {
-	        //element is a single element
-            return this.htmlElement;
-        }
-
-        return null;
     }
 
     isHidden() {
