@@ -62,6 +62,12 @@ class Events {
 	 * @return {void}
      */
     add(ev, callback, selector = null) {
+    	if(ev === '*') {
+    		for(let i = 0; i < this.events.length; i++) {
+    			this.add(this.events[i], callback, selector);
+			}
+		}
+
 		if(selector) {
             this.element.htmlElement.addEventListener(ev, (event) => {
                 if(new Element(event.target).matches(selector)) {
