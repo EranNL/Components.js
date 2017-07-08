@@ -87,6 +87,7 @@ class Element {
 
     /**
      * Appends a htmlElement to the end of this html element
+     *
      * @param {*} toBeAppended The element/ selector that has to be appended
      * @return {Element}
      * @todo CLEAN UP!
@@ -138,6 +139,41 @@ class Element {
         }
     }
 
+    /**
+     * Get a specific element in the collection
+     *
+     * @param {number} index The index of the element in the collection
+     * @return {Element}
+     */
+    get(index = 0) {
+        if( this.isCollection() ) {
+            return this.htmlElement.get(index);
+        }
+        else {
+            return this;
+        }
+
+    }
+
+    not(selector) {
+        if( this.isCollection() ) {
+            let newCollection = this.htmlElement.filter(element => {
+                return element.matches(selector);
+            });
+
+            return newCollection;
+        }
+        else {
+
+        }
+    }
+
+    /**
+     * Insert this element before the target element
+     *
+     * @param {*} target
+     * @return {Element}
+     */
     before(target) {
         if(this.isCollection()) {
             return;
@@ -150,9 +186,11 @@ class Element {
                 })
             }
             else {
-                target.htmlElement.parentNode.appendChild(this.htmlElement);
+                target.htmlElement.parentNode.insertBefore(this.htmlElement, target.htmlElement);
             }
         }
+
+        return this;
 
     }
 
@@ -274,7 +312,16 @@ class Element {
             if( attribute.name.indexOf('data-') == 0 ) {
                 let name = attribute.name.substr("data-".length, attribute.name.length - 1);
 
-                returnData[name] = /{.*}/g.test(attribute.value) ? Str.toObject(attribute.value) : attribute.value;
+                if(name === 'options' && /{.*}/g.test(attribute.value)) {
+                    let values = Str.toObject(attribute.value);
+
+                    for(let key in values) {
+                        returnData[key] = values[key];
+                    }
+                }
+                else {
+                    returnData[name] = /{.*}/g.test(attribute.value) ? Str.toObject(attribute.value) : attribute.value;
+                }
             }
         }
 
@@ -348,12 +395,18 @@ class Element {
 	    let matchesElements = true;
 
 	    let match = function(element) {
-            let matches = (window.document || window.ownerDocument).querySelectorAll(selector),
-                i = matches.length;
+	        if( typeof selector == 'string' ) {
+                let matches = (window.document || window.ownerDocument).querySelectorAll(selector),
+                    i = matches.length;
 
-            while (--i >= 0 && matches[i] !== (element instanceof Element ? element.htmlElement : element)) {}
-            return i > -1;
+                while (--i >= 0 && matches[i] !== (element instanceof Element ? element.htmlElement : element)) {}
+                return i > -1;
+            }
+            else if ( selector instanceof Element) {
+	            return selector.isCollection() ? false : selector.htmlElement === (element instanceof Element ? element.htmlElement : element);
+            }
         }
+
 	    if(this.isCollection()) {
 	        this.htmlElement.each((element) => {
 	            if(!match(element)) {
@@ -408,6 +461,35 @@ class Element {
     }
 
     /**
+     * Removes the given classname if the element has this class
+     * @param className
+     * @return {Element}
+     */
+    removeClass(className) {
+        if( this.isCollection() ) {
+            this.htmlElement.each(element => {
+                //recursively call for each element in the collection
+                element.removeClass(className);
+            })
+        }
+        else {
+            let classes = this.htmlElement.getAttribute('class');
+            let index;
+            if(classes !== null) {
+                classes = classes.split(' ');
+                index = classes.indexOf(className);
+
+                if(index > -1) {
+                    classes.splice(index, 1);
+                    this.htmlElement.setAttribute('class', classes.join(' '));
+                }
+            }
+        }
+
+        return this;
+    }
+
+    /**
 	 * Checks whether the element has a specific class
 	 *
      * @param {String} className The class the lement has to have
@@ -441,31 +523,64 @@ class Element {
 	}
 
     /**
+     * Replaces or gets the html of this element
+     * @param {*} html
+     */
+	html(html) {
+	    if( this.isCollection() ) {
+	        if(html) {
+	            this.htmlElement.each(element => {
+	                element.html(html);
+                })
+            }
+            else {
+                return this.htmlElement.get(0).htmlElement.innerHTML;
+            }
+        }
+        else {
+	        if(!html) {
+	            return this.htmlElement.innerHTML;
+            }
+            else if(typeof html == 'string') {
+                //Remove the entire content of this element
+                while(this.htmlElement.firstChild) {
+                    this.htmlElement.removeChild(this.htmlElement.firstChild);
+                }
+
+                //fill this element with the new content
+                this.append(html);
+            }
+            else if (typeof html == 'function') {
+	            //closures can be used for html manipulations with
+                let tempHtml = this.htmlElement.innerHTML;
+
+                while(this.htmlElement.firstChild) {
+                    this.htmlElement.removeChild(this.htmlElement.firstChild);
+                }
+
+                this.append(html(tempHtml));
+            }
+        }
+    }
+
+    /**
      * Event handler to listen to events occuring on the element and then executing a callback
      * @param {*} ev String: The name of the event
      *               Array: List of events
      * @param {Function} callback
      * @return {Element}
+     *
+     * @fixme
      */
 	on(ev, selector, callback) {
 	    if(typeof selector == 'function') {
 	        callback = selector;
 	        selector = null;
         }
-
-	    if( this.isCollection() ) {
-            if(typeof ev == 'object' ) {
-                for(let i = 0; i < ev.length; i++) {
-                    this.htmlElement.each(element => {
-                        element.events.add(ev[i], (event) => callback(element, event), selector);
-                    })
-                }
-            }
-            else {
-                this.htmlElement.each(element => {
-                    element.events.add(ev, (event) => callback(element, event), selector);
-                })
-            }
+        if( this.isCollection() ) {
+            this.htmlElement.each(element => {
+                element.events.add(ev, (event) => callback(element, event), selector);
+            })
         }
         else {
             this.events.add(ev, (event) => callback(new Element(this.htmlElement), event), selector);
@@ -475,6 +590,46 @@ class Element {
 	}
 
     /**
+     * Triggers a given event on the element
+     * @param String ev
+     */
+	trigger(ev) {
+	    if(this.isCollection()) {
+	        this.htmlElement.each(element => {
+	            element.trigger(ev);
+            })
+        }
+        else {
+            let event = document.createEvent('Event');
+            event.initEvent(ev, true, true);
+
+            if(this.htmlElement[ev]) {
+                this.htmlElement[ev].call(this.htmlElement);
+            }
+            else {
+                this.htmlElement.dispatchEvent(event);
+            }
+        }
+
+    }
+
+    /**
+     * Returns the number of elements in the collection
+     *
+     * @return {number}
+     */
+    length() {
+	    if( this.isCollection() ) {
+	        return this.htmlElement.length();
+        }
+        else if (this.htmlElement === null) {
+	        return 0;
+        }
+
+        return 1;
+    }
+
+    /**
      * Applies a css property to the element
      *
      * @param {*} Object: key-object notation of property-value
@@ -482,7 +637,7 @@ class Element {
      *
      * @return {Element}
      *
-     * @Todo Fix CSS properties by argument, instead of object
+     * Todo Fix CSS properties by argument, instead of object
      */
     css() {
         if(arguments.length === 1 && typeof arguments[0] == 'string') {
@@ -496,8 +651,10 @@ class Element {
             })
         }
         else {
-            if( typeof arguments == 'object' ) {
+            if( typeof arguments[0] == 'object' ) {
+
                 for(let key in arguments[0]) {
+                    //console.log(arguments[0][key]);
                     this.htmlElement.style[key] = arguments[0][key];
                 }
             }
@@ -507,19 +664,6 @@ class Element {
         }
 
         return this;
-    }
-
-    /**
-     * Quick fix to set the display of the element to 'block'
-     *
-     * @todo perhaps add animations
-     */
-    show() {
-        this.css({display: 'block'});
-    }
-
-    hide() {
-        this.css({display: 'none'});
     }
 
     /**
@@ -564,8 +708,58 @@ class Element {
         }
     }
 
-    isHidden() {
+    /**
+     * Returns the value of the element, if that element is an input-like element,
+     *
+     * @param String value The value to be set to the element
+     *
+     * @return {*}
+     */
+    val(value) {
+        if(!value) {
+            if(this.isCollection()) {
+                return "";
+            }
+            else {
+                return this.htmlElement.value;
+            }
+        }
+        else if(typeof value == 'string') {
+            if(this.isCollection()) {
+                this.htmlElement.each(element => {
+                    element.val(value);
+                })
+            }
+            else {
+                this.htmlElement.value = value;
+            }
+        }
 
+        return this;
+    }
+
+    /**
+     * Selects the next element, or an element with a specific class if that is applied.
+     * @param String selector
+     * @return {*}
+     */
+    next(selector) {
+	    if(this.isCollection()) {
+	        return null;
+        }
+
+        if(!selector) {
+	        return new Element(this.htmlElement.nextSibling);
+        }
+        else {
+	        let node = this.htmlElement;
+	        while(node = node.nextSibling) {
+                if((new Element(node)).matches(selector)) {
+                    return new Element(node);
+                }
+            }
+            return this;
+        }
     }
 }
 
