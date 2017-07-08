@@ -64,6 +64,23 @@ class Collection {
     }
 
     /**
+     * Returns the last value of the array
+     * return {*}
+     */
+    last() {
+        return this.array[this.array.length - 1];
+    }
+
+    /**
+     * Removes the last value from the array
+     *
+     * return {Collection}
+     */
+    pop() {
+        this.array.pop();
+    }
+
+    /**
      * Returns the index(es) on which a given value is located in a collection.
      *
      * @param {String} value The value that is looked for
