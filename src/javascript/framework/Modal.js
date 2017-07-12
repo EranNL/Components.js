@@ -1,7 +1,6 @@
 import Component from '../components/Component';
 import Element from '../components/dom/Element';
 import Keyboard from "../components/util/Keyboard";
-import Collection from "../components/util/Collection";
 import Stack from "../components/util/Stack";
 
 class Modal extends Component {
@@ -37,7 +36,7 @@ class Modal extends Component {
                 // this.checkForBackground();
 
                 //Add an delegated event to the background to close the modal on click
-                CJS(document).on('click', '.background', this.onClose.bind(this));
+                CJS(document).on('click', '.modal-background', this.onAllClose.bind(this));
 
                 //Replace the variables within the modal with special ones
                 // if(!!this.element.getData('modal-replace')) {
@@ -49,6 +48,12 @@ class Modal extends Component {
         }
     }
 
+    /**
+     * Called when the modal has to be closed
+     *
+     *
+     * @callee [data-close]
+     */
     onClose() {
         //sluit de huidige modal
         this.$target.removeClass('open').css({display: 'none'});
@@ -61,6 +66,7 @@ class Modal extends Component {
             }
             else {
                 new Element('.modal-background').remove();
+                window.modals = null;
             }
 
 
@@ -70,6 +76,11 @@ class Modal extends Component {
         //zoja: verplaats de background voor de laatste
     }
 
+    /**
+     * Called when all all modals need to be closed
+     *
+     * @callee button:esc
+     */
     onAllClose() {
         this.$target.css({display: 'none'});
 
@@ -78,6 +89,7 @@ class Modal extends Component {
 
         if( background.length() ) {
             background.remove();
+            window.modals = null;
         }
     }
 
@@ -108,7 +120,6 @@ class Modal extends Component {
 
         window.modals.add(this.id);
 
-        console.log(window.modals)
     }
 }
 
