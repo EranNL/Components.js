@@ -71,13 +71,13 @@ class Events {
 		if(selector) {
             this.element.htmlElement.addEventListener(ev, (event) => {
                 if(new Element(event.target).matches(selector)) {
-                    callback();
+                    callback.apply(null, [new Element(event.target), event])
                 }
             })
         }
         else {
 			if(this.element.htmlElement.addEventListener) {
-                this.element.htmlElement.addEventListener(ev, callback)
+                this.element.htmlElement.addEventListener(ev, () => callback.apply(null, [this.element, event]));
 			}
 		}
 	}
