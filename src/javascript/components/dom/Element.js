@@ -579,11 +579,17 @@ class Element {
         }
         if( this.isCollection() ) {
             this.htmlElement.each(element => {
-                element.events.add(ev, (event) => callback(element, event), selector);
+                element.events.add(ev, callback, selector);
             })
         }
         else {
-            this.events.add(ev, (event) => callback(new Element(this.htmlElement), event), selector);
+	        if(selector) {
+                this.events.add(ev, callback, selector);
+            }
+            else {
+                this.events.add(ev, callback, selector);
+            }
+
         }
 
         return this;
@@ -640,26 +646,27 @@ class Element {
      * Todo Fix CSS properties by argument, instead of object
      */
     css() {
-        if(arguments.length === 1 && typeof arguments[0] == 'string') {
+        let properties = arguments;
+
+        if(Object.prototype.toString.call(arguments[0]) === '[object Object]') {
+            properties = arguments[0];
+        }
+        else if(typeof arguments[0] === 'string' && typeof arguments[1] === 'string') {
+            properties = {};
+            properties[arguments[0]] = arguments[1];
+        }
+
+        if(properties.length === 1 && typeof properties[0] == 'string') {
             let element = this.isCollection() ? this.htmlElement.get(0).htmlElement : this.htmlElement;
-            return window.getComputedStyle(element)[arguments[0]];
+            return window.getComputedStyle(element)[properties[0]];
         }
 
         if( this.isCollection() ) {
-            this.htmlElement.each(element => {
-                element.css(arguments);
-            })
+            this.htmlElement.each(element => element.css(properties));
         }
         else {
-            if( typeof arguments[0] == 'object' ) {
-
-                for(let key in arguments[0]) {
-                    //console.log(arguments[0][key]);
-                    this.htmlElement.style[key] = arguments[0][key];
-                }
-            }
-            else if(arguments.length === 2 && typeof arguments[0] === 'string' && typeof arguments[1] === 'string') {
-                this.htmlElement.style[arguments[0]] = arguments[1];
+            for(let key in properties) {
+                this.htmlElement.style[key] = properties[key];
             }
         }
 
