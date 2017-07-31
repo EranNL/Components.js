@@ -9,6 +9,7 @@ import Element from './components/dom/Element.js';
 import Str from './components/util/Str.js';
 import Events from "./components/dom/Events";
 import Keyboard from "./components/util/Keyboard";
+import Config from "./components/Config";
 
 "use strict";
 
@@ -62,8 +63,8 @@ class Components {
 	 * @return {void}
 	 */
 	init() {
-        let functionMap = {};
 		this.context.children('[data-component], [data-directive]').each(element => {
+            let functionMap = {};
 
 			functionMap['components'] = element.getData('component').split(' ');
 
@@ -120,6 +121,10 @@ class Components {
 	static get keyboard() {
 	    return new Keyboard;
     }
+
+    static getConfig() {
+		return new Config();
+	}
 }
 
 //Put the function in the global window object so it is accessible outside the scope of webpack
