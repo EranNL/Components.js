@@ -19,7 +19,7 @@ class Events {
 	 * @return {void}
      */
     getDOMEvents() {
-    	for( event in document.__proto__ ) {
+    	for( let event in document.__proto__ ) {
     		if( event.substr(0, 2) === 'on' ) {
     			this.events.push(event.substr(0, 2) + Str.ucFirst(event.substr(2, event.length)));
 			}
@@ -48,7 +48,7 @@ class Events {
 	attachEvents() {
 		for( let i = 0; i < this.events.length; i++ ) {
 			if( this._functionExists(this.events[i]) ) {
-				this.add(this.events[i].substr(2, this.events[i].length).toLowerCase(), () => this.instance.__proto__[this.events[i]].apply(this.instance, [this.element.htmlElement, event]));
+				this.add(this.events[i].substr(2, this.events[i].length).toLowerCase(), (event) => this.instance.__proto__[this.events[i]].apply(this.instance, [this.element.htmlElement, event]));
 			}
     	}
 	}
@@ -77,7 +77,7 @@ class Events {
         }
         else {
 			if(this.element.htmlElement.addEventListener) {
-                this.element.htmlElement.addEventListener(ev, () => callback.apply(null, [this.element, event]));
+                this.element.htmlElement.addEventListener(ev, (event) => callback.apply(null, [this.element, event]));
 			}
 		}
 	}
