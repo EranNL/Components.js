@@ -9,8 +9,6 @@ class Directive extends Component {
     }
 
     handleEvents() {
-        this.element.on('*', (element, event) => {
-        });
     }
 }
 
