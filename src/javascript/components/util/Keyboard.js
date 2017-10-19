@@ -11,7 +11,7 @@ class Keyboard {
             element = instance.element;
         }
 
-        element.events.add('keydown', (event) => {
+        element.events.add('keydown', (element, event) => {
             for( let key in keyMap ) {
                 if( this.handleKey(event) === key ) {
                     return instance.__proto__[keyMap[key]] ? instance.__proto__[keyMap[key]].apply(instance, [instance.element, event]) : false;
