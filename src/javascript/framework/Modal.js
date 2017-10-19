@@ -12,10 +12,6 @@ class Modal extends Component {
         this.$target = new Element('#' + this.element.getData('target'));
         this.$target.attr('data-modal-id', this.id);
         this.$target.find('[data-close]').on('click', this.onClose.bind(this));
-
-        Keyboard.register(this, {
-            'ESC': 'onAllClose'
-        }, document);
     }
 
     onClick() {
@@ -33,18 +29,21 @@ class Modal extends Component {
                     background.addClass('modal-background').before(this.$target);
                 }
 
-                // this.checkForBackground();
 
                 //Add an delegated event to the background to close the modal on click
-                CJS(document).on('click', '.modal-background', this.onAllClose.bind(this));
+                new Element(document).on('click', '.modal-background', this.onAllClose.bind(this));
 
-                //Replace the variables within the modal with special ones
-                // if(!!this.element.getData('modal-replace')) {
-                //     this.populateData();
-                // }
+                // Replace the variables within the modal with special ones
+                if(!!this.element.getData('modal-replace')) {
+                    this.populateData();
+                }
             }
 
             this.$target.css({display: 'block'}).addClass('open').trigger('modal.opened');
+
+            Keyboard.register(this, {
+                'ESC': 'onAllClose'
+            }, document);
         }
     }
 
@@ -71,9 +70,6 @@ class Modal extends Component {
 
 
         }
-        //verwijder de laatste van de stack
-        //kijk of de stack met modals nog een waarde heeft
-        //zoja: verplaats de background voor de laatste
     }
 
     /**
