@@ -1,15 +1,11 @@
-var path = require('path');
+let path = require('path');
+let webpack = require('webpack');
 
 module.exports = {
-	// resolve: {
- //  		root: [
-    // 		path.resolve('./src/javascript')
- //  		]
-	// },
 	entry: './src/javascript/core.js',
 	output: {
-		path: 'build',
-		filename: 'bundle.js'
+		path: path.resolve(__dirname, 'build'),
+		filename: 'bundle.js',
 	},
 	module: {
 		loaders: [
@@ -18,8 +14,8 @@ module.exports = {
 				exclude: /(node_modules)/,
 				loader: 'babel-loader',
 				query: {
-					presets: ['es2015']
-				}
+					presets: ['es2015'],
+				},
 			},
 			/*{
 				test: /\.scss$/,
@@ -29,6 +25,11 @@ module.exports = {
 			    test: /\.(png|jpg)$/,
 			    loader: 'url-loader?limit=10000'
 			}*/
-	 ]
- }
+		],
+	},
+    plugins: [
+        new webpack.optimize.UglifyJsPlugin({compress: { warnings: false }})
+    ],
+    target: 'node'
+
 };
