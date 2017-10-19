@@ -10,6 +10,7 @@ import Str from './components/util/Str.js';
 import Events from "./components/dom/Events";
 import Keyboard from "./components/util/Keyboard";
 import Config from "./components/Config";
+import Websocketserver from "./components/http/websockets/Websocketserver";
 
 "use strict";
 
@@ -22,13 +23,17 @@ class Components {
 	 *
 	 * @todo: Improve!!!
 	 */
-	constructor(element, init = false) {
-		 if( init ) {
-             this.context = new Element(element);
-		 }
-		 else {
-		 	return new Element(element);
-		 }
+	constructor(element) {
+		 this.context = new Element(element);
+		 this.initialized = false;
+		 this.init();
+
+		 this.config = new Config();
+
+		 if(this.config.getBoolean('websockets')) {
+		     console.log("[Websockets] -> started")
+		     this.websocketserver = new Websocketserver();
+         }
 	}
 
     /**
@@ -63,56 +68,69 @@ class Components {
 	 * @return {void}
 	 */
 	init() {
-		this.context.children('[data-component], [data-directive]').each(element => {
-            let functionMap = {};
+		if(!this.initialized) {
+			this.context.children('[data-component], [data-directive]').each(element => {
+	            let functionMap = {};
 
-			functionMap['components'] = element.getData('component').split(' ');
+				functionMap['components'] = element.getData('component').split(' ');
 
-			if( element.getData('directive') ) functionMap['directives'] = element.getData('directive').split(' ');
+				if( element.getData('directive') ) functionMap['directives'] = element.getData('directive').split(' ');
 
-			for(let name in functionMap) {
-			    //loop through the array that "key" holds
-			    for(let i = 0; i < functionMap[name].length; i++) {
+				for(let name in functionMap) {
+				    //loop through the array that "key" holds
+				    for(let i = 0; i < functionMap[name].length; i++) {
 
-			        //@TODO: fix weird empty component,
-			        if(!functionMap[name][i]) {
-			            continue;
-                    }
+				        //@TODO: fix weird empty component,
+				        if(!functionMap[name][i]) {
+				            continue;
+	                    }
 
-			        let componentTree = null;
+				        let componentTree = null;
 
-			        if(/.+[\.].+/.test(functionMap[name][i])) {
-			            let tree = functionMap[name][i].split('.');
-                        tree[tree.length - 1] = Str.ucFirst(tree[tree.length - 1]);
+				        if(/.+[\.].+/.test(functionMap[name][i])) {
+				            let tree = functionMap[name][i].split('.');
+	                        tree[tree.length - 1] = Str.ucFirst(tree[tree.length - 1]);
 
-                        componentTree = (name !== 'components' ? name + '/' : '') +
-						tree.join('/') +
-                            Str.ucFirst(name.substr(0, name.length - 1));
-                    }
-                    else {
-                        componentTree = (name !== 'components' ? name + '/' : '') +
-                            Str.ucFirst(functionMap[name][i]) +
-                            (name !== 'components' ? Str.ucFirst(name.substr(0, name.length - 1)) : '');
-                    }
+	                        componentTree = (name !== 'components' ? name + '/' : '') +
+							tree.join('/') +
+	                            Str.ucFirst(name.substr(0, name.length - 1));
+	                    }
+	                    else {
+	                        componentTree = (name !== 'components' ? name + '/' : '') +
+	                            Str.ucFirst(functionMap[name][i]) +
+	                            (name !== 'components' ? Str.ucFirst(name.substr(0, name.length - 1)) : '');
+	                    }
 
-                    try {
-                        let component = require('./framework/' + componentTree + '.js').default;
-                        new component(element);
-                    }
-                    catch ( err ) {
-                        //no module was found, try to fetch it from the array
-                        if( componentList[name][functionMap[name][i]] !== undefined ) {
-                            new componentList[name][functionMap[name][i]](element, Components);
-                        }
-                        else {
-                            console.error(err);
-                            console.error('Module ' + functionMap[name][i] + ' was not found. Does it exist?');
-                        }
-                    }
-                }
-            }
-		})
+	                    try {
+	                        let component = require('./framework/' + componentTree + '.js').default;
+	                        new component(element);
+	                    }
+	                    catch ( err ) {
+	                        //no module was found, try to fetch it from the array
+	                        if( componentList[name][functionMap[name][i]] !== undefined ) {
+	                            new componentList[name][functionMap[name][i]](element, Components);
+	                        }
+	                        else {
+	                            console.error(err);
+	                            console.error('Module ' + functionMap[name][i] + ' was not found. Does it exist?');
+	                        }
+	                    }
+	                }
+	            }
+			})
+
+			this.initialized = true;
+		}
 	}
+
+    /**
+     * Returns the websocket server, if it is initialized. Otherwise return null
+     *
+     * @return {Websocketserver|null}
+     */
+	static getWebsocketserver() {
+	    return this.websocketserver || null;
+    }
 
     /**
      * Return a new Keyboard instance, used to register keyboard events to custom plugins
@@ -121,10 +139,6 @@ class Components {
 	static get keyboard() {
 	    return new Keyboard;
     }
-
-    static getConfig() {
-		return new Config();
-	}
 }
 
 //Put the function in the global window object so it is accessible outside the scope of webpack
@@ -134,7 +148,6 @@ window.Components = Components;
  * Overwrite the existing Octa variable
  * @todo Delete after browsers officially support ES6?
  */
-window.ComponentsJS = window.CJS = function(element, init) {
-	return new Components(element, init);
+window.ComponentsJS = window.CJS = function(element) {
+	return new Components(element);
 };
-
