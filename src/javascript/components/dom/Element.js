@@ -288,7 +288,7 @@ class Element {
 
         if( this.isCollection() ) {
             this.htmlElement.each(element => {
-                element.setAttr(attr, value);
+                element.attr(attr, value);
             })
         }
         else {
@@ -521,7 +521,7 @@ class Element {
             return false;
         }
 
-        return this.htmlElement.getAttribute("class").indexOf(className) != -1;
+        return this.htmlElement.getAttribute('class') && this.htmlElement.getAttribute("class").indexOf(className) != -1;
     }
 
     /**
@@ -572,7 +572,7 @@ class Element {
                 this.append(html);
             }
             else if( typeof html == 'function' ) {
-                //closures can be used for html manipulations with
+                //closures can be used for html manipulations
                 let tempHtml = this.htmlElement.innerHTML;
 
                 while( this.htmlElement.firstChild ) {
@@ -794,6 +794,8 @@ class Element {
      * Selects the next element, or an element with a specific class if that is applied.
      * @param String selector
      * @return {*}
+     *
+     * @todo no selector removes the element itself
      */
     next(selector) {
         if( this.isCollection() ) {
