@@ -1,13 +1,16 @@
+import Element from "./dom/Element";
 
 
 class Config {
 
     constructor() {
         this.c = this.getConfig();
+
+        this.csrf = new Element('meta[name="csrf-token"]').attr('content');
     }
 
     getConfig() {
-        if( !window.cjsConfig ) {
+        if (!window.cjsConfig) {
             window.cjsConfig = {};
         }
 
@@ -32,11 +35,33 @@ class Config {
      */
     getBoolean(key) {
 
-        if(typeof this.c[key] === "boolean") {
+        if (typeof this.c[key] === "boolean") {
             return this.c[key];
         }
 
         return this.c[key] === "true" || this.c[key] === "1";
+    }
+
+    /**
+     * Parses and returns the integer value of the requested key, while the
+     * value is a valid integer
+     *
+     * @param string key
+     * @returns {Integer}
+     */
+    getInteger(key) {
+        return !isNaN(parseInt(this.c[key])) || parseInt(this.c[key]);
+    }
+
+    /**
+     * Parses and returns the float value of the requested key, while the
+     * value is a valid float
+     *
+     * @param string key
+     * @returns {Integer}
+     */
+    getFloat(key) {
+        return !isNaN(parseFloat(this.c[key])) || parseFloat(this.c[key]);
     }
 
     /**
