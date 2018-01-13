@@ -10,12 +10,17 @@ class Modal extends Component {
         this.id = Math.floor(Math.random() * 9999 + Date.now());
 
         this.$target = new Element('#' + this.element.getData('target'));
+
+        if(!this.$target.length()) {
+            return;
+        }
+
         this.$target.attr('data-modal-id', this.id);
         this.$target.find('[data-close]').on('click', this.onClose.bind(this));
     }
 
     onClick() {
-        if(this.$target.css('display') === 'none') {
+        if(this.$target.length() && this.$target.css('display') === 'none') {
             if( this.element.getData('background') ) {
                 this.addModalToStack();
                 //Create a background element
