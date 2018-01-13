@@ -12,6 +12,8 @@ class Input extends Component {
     constructor(element) {
         super(element);
 
+        this.inheritsValue = new Element('[data-input-value="' + this.element.attr('id') + '"]');
+
         this.checkForChanges();
 
         for (let attribute in this.element.getData()) {
@@ -75,12 +77,11 @@ class Input extends Component {
      *
      */
     applyValToElements() {
-        let targets = new Element('[data-input-value="' + this.element.attr('id') + '"]');
         if (this.element.val() === "") {
-            targets.text(" ");
+            this.inheritsValue.text(" ");
         }
         else {
-            targets.text(this.element.val());
+            this.inheritsValue.text(this.element.val());
         }
     }
 
