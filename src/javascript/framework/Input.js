@@ -1,5 +1,6 @@
 import Component from '../components/Component';
 import Element from '../components/dom/Element';
+import Str from "../components/util/Str";
 
 class Input extends Component {
 
@@ -12,10 +13,44 @@ class Input extends Component {
         super(element);
 
         this.checkForChanges();
+
+        for (let attribute in this.element.getData()) {
+            if (this['apply' + Str.ucFirst(attribute)]) this['apply' + Str.ucFirst(attribute)].call(this);
+        }
     }
 
     /**
-     * Fires when the element looses focus
+     * function that adds a cross to the input, which on clicked erases the input's value
+     */
+    applyErasable() {
+        let parent = this.element.parent();
+
+        if (parent.hasClass('input-erasable')) {
+            parent.find('.erase').on('click', () => this.element.val(''))
+        }
+    }
+
+    /**
+     * Function that filters the input's value of characters that doesn't match the applied
+     * match pattern. These chraracters are removed from the input's value
+     *
+     * @return void
+     */
+    applyMatch() {
+        this.element.on(['keyup', 'keydown'], (element, e) => {
+            let value = String.fromCharCode(e.which) || e.key;
+            //make sure the pattern doesn't have leading or trailing slashes
+            let reg = this.element.getData('match').replace(/^\/|\/$/g, '');
+
+            if (!new RegExp(reg, 'gi').test(value)) {
+                e.preventDefault();
+                return false;
+            }
+        })
+    }
+
+    /**
+     * Fires when the element loses focus
      *
      */
     onBlur() {
@@ -40,8 +75,8 @@ class Input extends Component {
      *
      */
     applyValToElements() {
-        let targets = new Element('[data-input-value="'+ this.element.attr('id') +'"]');
-        if(this.element.val() === "") {
+        let targets = new Element('[data-input-value="' + this.element.attr('id') + '"]');
+        if (this.element.val() === "") {
             targets.text(" ");
         }
         else {
@@ -55,8 +90,9 @@ class Input extends Component {
      * @return {void}
      */
     removeErrors() {
-        if(this.element.val().length > 0 && this.element.parent().hasClass('has-error')) {
+        if (this.element.val().length > 0 && (this.element.parent().hasClass('has-error') || this.element.parent().hasClass('has-success'))) {
             this.element.parent().removeClass('has-error');
+            this.element.parent().removeClass('has-success');
             this.element.next('.help-block').remove();
         }
     }
