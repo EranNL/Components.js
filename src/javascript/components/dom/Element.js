@@ -533,15 +533,19 @@ class Element {
             })
         }
         else {
-            let classes = this.htmlElement.getAttribute('class');
-            let index;
-            if (classes !== null) {
-                classes = classes.split(' ');
-                index = classes.indexOf(className);
+            className = Array.isArray(className) ? className : [className];
 
-                if (index > -1) {
-                    classes.splice(index, 1);
-                    this.htmlElement.setAttribute('class', classes.join(' '));
+            for(let i = 0; i < className.length; i++) {
+                let classes = this.htmlElement.getAttribute('class');
+                let index;
+                if (classes !== null) {
+                    classes = classes.split(' ');
+                    index = classes.indexOf(className[i]);
+
+                    if (index > -1) {
+                        classes.splice(index, 1);
+                        this.htmlElement.setAttribute('class', classes.join(' '));
+                    }
                 }
             }
         }
