@@ -39,15 +39,20 @@ class Input extends Component {
      * @return void
      */
     applyMatch() {
-        this.element.on(['keyup', 'keydown'], (element, e) => {
-            let value = String.fromCharCode(e.which) || e.key;
+        this.element.on(['keyup', 'keydown'], () => {
+
             //make sure the pattern doesn't have leading or trailing slashes
             let reg = this.element.getData('match').replace(/^\/|\/$/g, '');
+            let value = this.element.val();
 
-            if (!new RegExp(reg, 'gi').test(value)) {
-                e.preventDefault();
-                return false;
+            for(let i = 0; i < value.length; i++) {
+                let char = value.charAt(i);
+                if(!new RegExp(reg, 'gi').test(char)) {
+                    value = value.substr(0, i) + value.substr(i + 1);
+                }
             }
+
+            this.element.val(value);
         })
     }
 
