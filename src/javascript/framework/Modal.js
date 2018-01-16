@@ -173,6 +173,9 @@ class Modal extends Component {
      */
     static open(target, background = true) {
         target = target instanceof Element ? target : new Element(target);
+
+        if(!target.length()) return;
+
         let modal = new Modal(target);
         modal
             .setTarget(target)
