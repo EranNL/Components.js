@@ -11,6 +11,7 @@ import Events from "./components/dom/Events";
 import Keyboard from "./components/util/Keyboard";
 import Config from "./components/Config";
 import Websocketserver from "./components/http/websockets/Websocketserver";
+import Modal from "./framework/Modal";
 
 "use strict";
 
@@ -30,10 +31,7 @@ class Components {
 
 		 this.config = new Config();
 
-		 if(this.config.getBoolean('websockets')) {
-		     console.log("[Websockets] -> started")
-		     this.websocketserver = new Websocketserver();
-         }
+		 this.startServices();
 	}
 
     /**
@@ -139,13 +137,25 @@ class Components {
 	static get keyboard() {
 	    return new Keyboard;
     }
+
+    /**
+	 * Start the services used by this application
+	 *
+	 * @todo more general way of starting them
+     */
+    startServices() {
+        if(this.config.getBoolean('websockets')) {
+            console.log("[Websockets] -> started")
+            this.websocketserver = new Websocketserver();
+        }
+    }
 }
 
 //Put the function in the global window object so it is accessible outside the scope of webpack
 window.Components = Components;
 
 /**
- * Overwrite the existing Octa variable
+ * Overwrite the existing ComponentsJS variable
  * @todo Delete after browsers officially support ES6?
  */
 window.ComponentsJS = window.CJS = function(element) {
