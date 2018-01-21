@@ -432,7 +432,6 @@ class Element {
                     returnChildren.push(new Element(children))
                 }
             })
-            console.log(1);
 
             return new Element(returnChildren);
         }
@@ -722,8 +721,8 @@ class Element {
     /**
      * Applies a css property to the element
      *
-     * @param {*} Object: key-object notation of property-value
-     *            String, String: The property and value of the to be applied css
+     * @param {String|Object} Object: key-object notation of property-value
+     *                        String: The property and value of the to be applied css
      *
      * @return {Element}
      *
