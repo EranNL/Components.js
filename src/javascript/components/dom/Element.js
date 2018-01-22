@@ -534,7 +534,7 @@ class Element {
         else {
             className = Array.isArray(className) ? className : [className];
 
-            for(let i = 0; i < className.length; i++) {
+            for (let i = 0; i < className.length; i++) {
                 let classes = this.htmlElement.getAttribute('class');
                 let index;
                 if (classes !== null) {
@@ -910,6 +910,7 @@ class Element {
     }
 
     serialize(form = true) {
+
         let serializedString = '';
 
         if (this.isCollection()) {
@@ -922,11 +923,30 @@ class Element {
 
             if (this.htmlElement.nodeName.toLowerCase() === 'form' || !form) {
                 for (let i = 0; i < this.children().length(); i++) {
-                    let node = this.children().get(i).htmlElement.nodeName.toLowerCase();
+                    let input = this.children().get(i);
+                    let nodeName = input.htmlElement.nodeName.toLowerCase();
+                    let type = input.htmlElement.type;
 
-                    if (node === 'input' || node === 'textarea' || node === 'select') {
-                        valuesObject[this.children().get(i).htmlElement.name] = this.children().get(i).htmlElement.value;
+                    if (nodeName === 'input' || nodeName === 'select' || input === 'textarea') {
+                        if (type === 'file' || type === 'reset') {
+                            continue;
+                        }
+                        else if (type === 'select-multiple') {
+                            let options = input.htmlElement.option;
+
+                            for (let x = 0; x < options.length; x++) {
+                                if(options[x].selected) {
+                                    valuesObject[input.htmlElement.name] = options[x].value;
+                                }
+                            }
+                        }
+                        else {
+                            if((type !== 'checkbox' && type !== 'radio') || input.htmlElement.checked) {
+                                valuesObject[input.htmlElement.name] = input.htmlElement.value;
+                            }
+                        }
                     }
+
                 }
 
                 return Str.toURI(valuesObject);
