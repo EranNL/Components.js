@@ -909,7 +909,17 @@ class Element {
         return new Element;
     }
 
+    /**
+     * Serializes the form data in a URI string
+     *
+     * @param {boolean} form Whether the serialized element is a form
+     * @return {String|null} The encodes form data or null
+     */
     serialize(form = true) {
+
+        if(!this.htmlElement) {
+            return null;
+        }
 
         let serializedString = '';
 
@@ -951,6 +961,8 @@ class Element {
 
                 return Str.toURI(valuesObject);
             }
+
+            return null;
         }
     }
 }
