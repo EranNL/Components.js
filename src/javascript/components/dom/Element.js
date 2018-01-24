@@ -965,6 +965,19 @@ class Element {
             return null;
         }
     }
+
+    scrollDown() {
+        if(this.isCollection()) {
+            this.htmlElement.each(element => {
+                element.scrollDown();
+            });
+        }
+        else {
+            this.htmlElement.scrollTop = this.htmlElement.scrollHeight;
+        }
+
+        return this;
+    }
 }
 
 export default Element;
