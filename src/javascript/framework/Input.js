@@ -15,10 +15,6 @@ class Input extends Component {
         this.inheritsValue = new Element('[data-input-value="' + this.element.attr('id') + '"]');
 
         this.checkForChanges();
-
-        for (let attribute in this.element.getData()) {
-            if (this['apply' + Str.ucFirst(attribute)]) this['apply' + Str.ucFirst(attribute)].call(this);
-        }
     }
 
     /**
