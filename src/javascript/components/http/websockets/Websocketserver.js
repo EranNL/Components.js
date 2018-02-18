@@ -14,9 +14,10 @@ class Websocketserver {
         if (!window.websocket) {
             window.websocket = new Echo({
                 broadcaster: 'pusher',
-                key: 'a1207f83d18dbb3080b0',
+                key: 'bcd0be82a8883b842273',
                 cluster: 'eu',
                 encrypted: false,
+                authEndpoint: this.config.get('url') + '/broadcasting/auth'
             });
         }
         /**
