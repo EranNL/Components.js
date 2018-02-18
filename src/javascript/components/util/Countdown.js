@@ -34,7 +34,7 @@ class Countdown {
      */
     start() {
         this.interval = setInterval(() => {
-            if (this.timeleft > 0) {
+            if (this.timeleft > 1) {
                 this.timeleft = Date.parse(this.end) - Date.now();
 
                 this.update();
@@ -75,7 +75,7 @@ class Countdown {
         if (this.target !== null) {
             this.se.text(this.seconds < 10 ? "0" + this.seconds : this.seconds);
             this.mine.text(this.minutes < 10 ? "0" + this.minutes : this.minutes);
-            this.he.text(this.hours < 10 ? "0" + this.hours : this.hours);
+            this.he.text(this.hours);
             this.de.text(this.days);
         }
     }
