@@ -24,7 +24,7 @@ class HTTPRequest {
             }
 
             if (this.data.responseType) {
-                req.setRequestHeader('Content-Type', 'application/' + this.data.responseType.toLowerCase());
+                req.responseType = this.data.responseType.toLowerCase();
             }
 
             if (!this.data.crossDomain) {
@@ -33,7 +33,12 @@ class HTTPRequest {
 
             req.onload = () => {
                 if (req.status === 200) {
-                    resolve(new HTTPResponse(req));
+                    if(this.data.responseType) {
+                        resolve(req.response);
+                    }
+                    else {
+                        resolve(new HTTPResponse(req));
+                    }
                 }
                 else {
                     reject(new HTTPResponse(req));

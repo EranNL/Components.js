@@ -50,7 +50,7 @@ class Config {
      * @returns {Integer}
      */
     getInteger(key) {
-        return !isNaN(parseInt(this.c[key])) || parseInt(this.c[key]);
+        return !isNaN(parseInt(this.c[key])) ? parseInt(this.c[key]) : null;
     }
 
     /**
@@ -61,7 +61,7 @@ class Config {
      * @returns {Integer}
      */
     getFloat(key) {
-        return !isNaN(parseFloat(this.c[key])) || parseFloat(this.c[key]);
+        return !isNaN(parseFloat(this.c[key])) ? parseFloat(this.c[key]) : null;
     }
 
     /**
