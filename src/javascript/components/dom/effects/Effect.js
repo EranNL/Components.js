@@ -1,6 +1,6 @@
 class Effect {
 
-    constructor(type, duration, element, easing) {
+    constructor(type = null, duration, element, easing) {
         this.duration = duration;
         this.element = element;
         this.easing = easing;
@@ -9,7 +9,9 @@ class Effect {
         this.hasFinished = false;
         this.cssDiff = {};
 
-        this[type].apply(this);
+        if(type && this[type])  {
+          this[type].call(this);
+        }
     }
 
     /**
@@ -48,21 +50,22 @@ class Effect {
      * @param {Object}
      */
     animate(css) {
-        if(typeof css === 'object') {
+        return new Promise((resolve, reject) => {
+          if(typeof css === 'object') {
             for(let property in css) {
-                this.cssDiff[property] = this.calculateDifference(property, css[property])
+              this.cssDiff[property] = this.calculateDifference(property, css[property]);
             }
-        }
-        else if(arguments.length === 2) {
+          }
+          else if(arguments.length === 2) {
             this.cssDiff[arguments[0]] = this.calculateDifference(arguments[0], arguments[1]);
-        }
-        else {
+          }
+          else {
             return;
-        }
+          }
 
-        let start = performance.now();
+          let start = performance.now();
 
-        this.animationFrame = requestAnimationFrame(function animate(time) {
+          this.animationFrame = requestAnimationFrame(function animate(time) {
             this.isRunning = true;
             let timeFraction = (time - start) / this.duration;
 
@@ -73,13 +76,13 @@ class Effect {
             this.draw(timing);
 
             if ( timing < 1 ) {
-                requestAnimationFrame(animate.bind(this));
+              requestAnimationFrame(animate.bind(this));
             }
             else {
-                this.isRunning = false;
-                this.hasFinished = true;
+                resolve(true);
             }
-        }.bind(this));
+          }.bind(this));
+        })
     }
 
     /**

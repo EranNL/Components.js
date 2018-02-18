@@ -10,47 +10,87 @@ class Modal extends Component {
         this.id = Math.floor(Math.random() * 9999 + Date.now());
 
         this.$target = new Element('#' + this.element.getData('target'));
+        this.background = true;
+
+        if(!this.$target.length()) {
+            return;
+        }
+
         this.$target.attr('data-modal-id', this.id);
         this.$target.find('[data-close]').on('click', this.onClose.bind(this));
+
+    }
+
+    /**
+     * Sets the target modal
+     *
+     * @param {Element} target The target modal
+     * @returns {Modal}
+     */
+    setTarget(target) {
+        this.$target = target;
+
+        return this;
+    }
+
+    /**
+     * Sets whether the background should be shown
+     *
+     * @param {boolean} allow Whether the background should be shown
+     * @returns {Modal}
+     */
+    setBackground(allow) {
+        this.background = allow;
+
+        return this;
+    }
+
+    onClick() {
+        if(this.$target.length() && this.$target.css('display') === 'none') {
+            this.background = this.element.getData('background');
+            this.openDialog();
+        }
+    }
+
+    /**
+     * Opens the dialog
+     *
+     * @return {void}
+     */
+    openDialog() {
+        if( this.background ) {
+            this.addModalToStack();
+            //Create a background element
+            let bg = new Element('.modal-background');
+            if( bg.length() ) {
+                //no new background has to be made
+
+                bg.get(0).before(this.$target);
+            }
+            else {
+                let background = Element.create('div');
+                background.addClass('modal-background').before(this.$target);
+            }
+
+
+            //Add an delegated event to the background to close the modal on click
+            new Element(document).on('click', '.modal-background', this.onAllClose.bind(this));
+
+            // Replace the variables within the modal with special ones
+            if(!!this.element.getData('modal-replace')) {
+                this.populateData();
+            }
+        }
+
+        this.$target.css({display: 'block'}).addClass('open').trigger('modal.opened');
 
         Keyboard.register(this, {
             'ESC': 'onAllClose'
         }, document);
     }
 
-    onClick() {
-        if(this.$target.css('display') === 'none') {
-            if( this.element.getData('background') ) {
-                this.addModalToStack();
-                //Create a background element
-                if( new Element('.modal-background').length() ) {
-                    //no new background has to be made
-
-                    new Element('.modal-background').get(0).before(this.$target);
-                }
-                else {
-                    let background = Element.create('div');
-                    background.addClass('modal-background').before(this.$target);
-                }
-
-                // this.checkForBackground();
-
-                //Add an delegated event to the background to close the modal on click
-                CJS(document).on('click', '.modal-background', this.onAllClose.bind(this));
-
-                //Replace the variables within the modal with special ones
-                // if(!!this.element.getData('modal-replace')) {
-                //     this.populateData();
-                // }
-            }
-
-            this.$target.css({display: 'block'}).addClass('open').trigger('modal.opened');
-        }
-    }
-
     /**
      * Called when the modal has to be closed
-     *
      *
      * @callee [data-close]
      */
@@ -58,7 +98,7 @@ class Modal extends Component {
         //sluit de huidige modal
         this.$target.removeClass('open').css({display: 'none'});
         //Als deze modal een background had:
-        if( this.element.getData('background') ) {
+        if( this.background ) {
             window.modals.remove();
 
             if( window.modals.size() ) {
@@ -71,15 +111,12 @@ class Modal extends Component {
 
 
         }
-        //verwijder de laatste van de stack
-        //kijk of de stack met modals nog een waarde heeft
-        //zoja: verplaats de background voor de laatste
     }
 
     /**
      * Called when all all modals need to be closed
      *
-     * @callee button:esc
+     * @callee button|esc
      */
     onAllClose() {
         this.$target.css({display: 'none'});
@@ -96,7 +133,7 @@ class Modal extends Component {
     /**
      * Replaces variables defined in the modal with dependant variables to a specific task
      *
-     * @return void
+     * @return {void}
      */
     populateData() {
         let data = this.element.getData('modal-replace');
@@ -112,6 +149,12 @@ class Modal extends Component {
         this.$target.find('[data-close]').on('click', this.onClose.bind(this));
     }
 
+    /**
+     * Adds the modal to the stack of modals, so it is known what the layer order
+     * of the models is when closing them
+     *
+     * @return {void}
+     */
     addModalToStack() {
         if( !window.modals ) {
             window.modals = new Stack();
@@ -120,6 +163,24 @@ class Modal extends Component {
 
         window.modals.add(this.id);
 
+    }
+
+    /**
+     * Opens the dialog without the need to click a button
+     *
+     * @param {Element|string} target The target modal
+     * @param {boolean} background Whether the backgrouns should be shown
+     */
+    static open(target, background = true) {
+        target = target instanceof Element ? target : new Element(target);
+
+        if(!target.length()) return;
+
+        let modal = new Modal(target);
+        modal
+            .setTarget(target)
+            .setBackground(background)
+            .openDialog();
     }
 }
 

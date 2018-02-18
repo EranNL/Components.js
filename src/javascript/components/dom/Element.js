@@ -5,6 +5,7 @@ import FadeEffect from './effects/FadeEffect';
 import SlideEffect from './effects/SlideEffect';
 import Str from '../util/Str.js';
 import Collection from '../util/Collection';
+import Effect from "./effects/Effect";
 
 class Element {
 
@@ -13,7 +14,7 @@ class Element {
 
         //Register a new Events instance for this element, so events are captured.
         //But only on non-objects
-        if( !this.isCollection() ) {
+        if (!this.isCollection()) {
             this.events = new Events(this);
         }
     }
@@ -30,43 +31,43 @@ class Element {
 
         let returnElements = new Collection();
 
-        if( !selector ) {
+        if (!selector) {
             return;
         }
 
-        if( context instanceof Element ) {
+        if (context instanceof Element) {
             context = context.htmlElement;
         }
 
-        if( Collection.isCollection(selector) ) {
+        if (Collection.isCollection(selector)) {
             //asssume that it is a collection of htmlElements
             return selector.filter(element => {
                 return element instanceof Element;
             });
         }
 
-        if( typeof selector == "string" ) {
+        if (typeof selector == "string") {
 
-            if( selector.indexOf('#') == 0 ) {
+            if (selector.indexOf('#') == 0) {
                 //Selector is an ID
                 return context.getElementById(selector.substr(1, selector.length));
             }
             else {
                 let elements = context.querySelectorAll(selector);
 
-                for( let i = 0; i < elements.length; i++ ) {
+                for (let i = 0; i < elements.length; i++) {
                     returnElements.push(new Element(elements[i]));
                 }
                 return returnElements;
             }
         }
         else {
-            if( selector.nodeType ) {
+            if (selector.nodeType) {
                 //getElementById, document, document.body
                 return selector;
-            } else if( selector instanceof HTMLCollection ) {
+            } else if (selector instanceof HTMLCollection) {
                 //getElementsByClassName or getElementsByClass
-                for( let i = 0; i < selector.length; i++ ) {
+                for (let i = 0; i < selector.length; i++) {
                     returnElements.push(new Element(selector[i]));
                 }
                 return returnElements;
@@ -80,7 +81,7 @@ class Element {
      * @return {Element}
      */
     static create(element) {
-        if( typeof element === 'string' ) {
+        if (typeof element === 'string') {
             return new Element(document.createElement(element));
         }
     }
@@ -93,7 +94,7 @@ class Element {
      * @todo CLEAN UP!
      */
     append(toBeAppended) {
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             this.htmlElement.each(element => {
                 element.append(toBeAppended);
             });
@@ -101,14 +102,14 @@ class Element {
             return this;
         }
         else {
-            if( toBeAppended instanceof Element ) {
-                if( toBeAppended.isCollection() ) {
+            if (toBeAppended instanceof Element) {
+                if (toBeAppended.isCollection()) {
                     let html = document.createElement('div');
                     toBeAppended.htmlElement.each(element => {
                         html.innterHtml += element.htmlElement.outerHTML;
                     })
 
-                    while( html.firstChild ) {
+                    while (html.firstChild) {
                         this.htmlElement.appendChild(html.firstChild)
                     }
                 }
@@ -116,17 +117,17 @@ class Element {
                     let html = document.createElement('div');
                     html.innerHTML += toBeAppended.htmlElement.outerHTML;
 
-                    while( html.firstChild ) {
+                    while (html.firstChild) {
                         this.htmlElement.appendChild(html.firstChild);
                     }
                 }
 
             }
-            else if( typeof toBeAppended === 'string' ) {
+            else if (typeof toBeAppended === 'string') {
                 let html = document.createElement('div');
                 html.innerHTML += toBeAppended;
 
-                while( html.firstChild ) {
+                while (html.firstChild) {
                     this.htmlElement.appendChild(html.firstChild);
                 }
             }
@@ -139,6 +140,10 @@ class Element {
         }
     }
 
+    appendAfter(selector) {
+
+    }
+
     /**
      * Get a specific element in the collection
      *
@@ -146,25 +151,35 @@ class Element {
      * @return {Element}
      */
     get(index = 0) {
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             return this.htmlElement.get(index);
         }
         else {
             return this;
         }
+    }
 
+    wrap(selector) {
+        if (this.isCollection()) {
+            this.htmlElement.each(element => {
+                element.wrap(selector);
+            })
+        }
+        else {
+            let wrap = Element.create('div').before(this.htmlElement);
+            wrap.append(this.htmlElement);
+
+            this.htmlElement.remove();
+        }
     }
 
     not(selector) {
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             let newCollection = this.htmlElement.filter(element => {
                 return !element.matches(selector);
             });
 
             return new Element(newCollection);
-        }
-        else {
-            console.log('hi')
         }
     }
 
@@ -173,9 +188,11 @@ class Element {
      * all elements from each item in the collection
      * @param selector
      * @return {Element}
+     *
+     * @todo match selector
      */
     parent(selector) {
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             let parentCollection = new Collection();
 
             this.htmlElement.each(element => {
@@ -196,12 +213,12 @@ class Element {
      * @return {Element}
      */
     before(target) {
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             return;
         }
 
-        if( target instanceof Element ) {
-            if( target.isCollection() ) {
+        if (target instanceof Element) {
+            if (target.isCollection()) {
                 target.htmlElement.each(element => {
                     element.before(this)
                 })
@@ -212,7 +229,25 @@ class Element {
         }
 
         return this;
+    }
 
+    after(target) {
+        if (this.isCollection()) {
+            return;
+        }
+
+        if (target instanceof Element) {
+            if (target.isCollection()) {
+                target.htmlElement.each(element => {
+                    element.after(this)
+                })
+            }
+            else {
+                target.htmlElement.parentNode.insertBefore(this.htmlElement, target.htmlElement.nextSibling);
+            }
+        }
+
+        return this;
     }
 
     /**
@@ -222,8 +257,8 @@ class Element {
      * @todo: fix events
      */
     prepend(toBePrepended) {
-        if( toBePrepended instanceof Element ) {
-            if( toBePrepended.isCollection() ) {
+        if (toBePrepended instanceof Element) {
+            if (toBePrepended.isCollection()) {
                 let html = '';
                 toBePrepended.htmlElement.each(element => {
                     html += element.htmlElement.outerHTML;
@@ -235,7 +270,7 @@ class Element {
             }
 
         }
-        else if( typeof toBePrepended === 'string' ) {
+        else if (typeof toBePrepended === 'string') {
             this.htmlElement.innerHTML += toBePrepended;
         }
         else {
@@ -245,8 +280,8 @@ class Element {
     }
 
     appendTo(selector) {
-        if( selector instanceof Element ) {
-            if( selector.isCollection() ) {
+        if (selector instanceof Element) {
+            if (selector.isCollection()) {
                 selector.each(element => {
                     element.append(this.htmlElement);
                 });
@@ -266,29 +301,29 @@ class Element {
      * Removes this elememt
      */
     remove() {
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             this.htmlElement.each(element => {
                 element.remove();
             });
         }
         else {
-            this.htmlElement.parentNode.removeChild(this.htmlElement);
+            this.htmlElement && this.htmlElement.parentNode.removeChild(this.htmlElement);
         }
     }
 
     attr(attr, value = null) {
-        if( value === null ) {
-            if( this.isCollection() ) {
-                return this.htmlElement.get(0).htmlElement.getAttribute(attr);
+        if (!value) {
+            if (this.isCollection()) {
+                return this.htmlElement.length() ? this.htmlElement.get(0).htmlElement.getAttribute(attr) : null;
             }
             else {
-                return this.htmlElement.getAttribute(attr);
+                return this.htmlElement && this.htmlElement.getAttribute(attr);
             }
         }
 
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             this.htmlElement.each(element => {
-                element.setAttr(attr, value);
+                element.attr(attr, value);
             })
         }
         else {
@@ -313,30 +348,30 @@ class Element {
      * @example
      * <div data-component="component" data-foo="bar" />
      *
-     * @param {String} key (optional) The specific value of a attribute key that has to be returned
+     * @param {String} attribute (optional) The specific value of a attribute key that has to be returned
      *
      * @return {*}    null: when not a specific element |
      *                String: when a key is specified |
      *                Object: when returning the whole options object
      */
-    getData(key) {
-        if( !this.htmlElement || this.isCollection() ) {
+    getData(attribute = null) {
+        if (!this.htmlElement || this.isCollection()) {
             return null;
         }
 
         let returnData = {};
         //@todo: retrieve data from localStorage
 
-        for( let i = 0; i < this.htmlElement.attributes.length; i++ ) {
+        for (let i = 0; i < this.htmlElement.attributes.length; i++) {
             let attribute = this.htmlElement.attributes[i];
 
-            if( attribute.name.indexOf('data-') == 0 ) {
+            if (attribute.name.indexOf('data-') == 0) {
                 let name = attribute.name.substr("data-".length, attribute.name.length - 1);
 
-                if( name === 'options' && /{.*}/g.test(attribute.value) ) {
+                if (name === 'options' && /{.*}/g.test(attribute.value)) {
                     let values = Str.toObject(attribute.value);
 
-                    for( let key in values ) {
+                    for (let key in values) {
                         returnData[key] = values[key];
                     }
                 }
@@ -346,8 +381,8 @@ class Element {
             }
         }
 
-        if( key ) {
-            return returnData[key] || "";
+        if (attribute) {
+            return returnData[attribute] || "";
         }
 
         return returnData;
@@ -361,14 +396,14 @@ class Element {
      * @return {void}
      */
     each(callback) {
-        if( this.isCollection() ) {
-            for( let i = 0; i < this.htmlElement.length(); i++ ) {
-                if( typeof callback == 'function' ) {
+        if (this.isCollection()) {
+            for (let i = 0; i < this.htmlElement.length(); i++) {
+                if (typeof callback == 'function') {
                     callback(this.htmlElement.get(i), i);
                 }
             }
         } else {
-            if( typeof callback == 'function' ) {
+            if (typeof callback == 'function') {
                 callback(new Element(this.htmlElement), 0);
             }
         }
@@ -383,12 +418,12 @@ class Element {
     children(selector = "*") {
         let returnChildren = new Collection();
 
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             this.htmlElement.each(element => {
                 let children = this._select(selector, element.htmlElement);
 
-                if( Collection.isCollection(children) ) {
-                    for( let i = 0; i < children.length(); i++ ) {
+                if (Collection.isCollection(children)) {
+                    for (let i = 0; i < children.length(); i++) {
                         returnChildren.push(children.get(i));
                     }
                 }
@@ -398,10 +433,10 @@ class Element {
                 }
             })
 
-            return returnChildren;
+            return new Element(returnChildren);
         }
         else {
-            return this._select(selector, this.htmlElement);
+            return new Element(this._select(selector, this.htmlElement));
         }
 
     }
@@ -414,23 +449,23 @@ class Element {
     matches(selector) {
         let matchesElements = true;
 
-        let match = function(element) {
-            if( typeof selector == 'string' ) {
+        let match = function (element) {
+            if (typeof selector == 'string') {
                 let matches = (window.document || window.ownerDocument).querySelectorAll(selector),
                     i = matches.length;
 
-                while( --i >= 0 && matches[i] !== (element instanceof Element ? element.htmlElement : element) ) {
+                while (--i >= 0 && matches[i] !== (element instanceof Element ? element.htmlElement : element)) {
                 }
                 return i > -1;
             }
-            else if( selector instanceof Element ) {
+            else if (selector instanceof Element) {
                 return selector.isCollection() ? false : selector.htmlElement === (element instanceof Element ? element.htmlElement : element);
             }
         }
 
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             this.htmlElement.each((element) => {
-                if( !match(element) ) {
+                if (!match(element)) {
                     matchesElements = false;
                 }
             })
@@ -443,11 +478,14 @@ class Element {
     }
 
     find(selector) {
-        if( typeof selector == 'string' ) {
-            let children = this.children(selector)
-            //     .filter(element => {
-            //     return element.matches(selector);
-            // });
+        if (typeof selector === 'string') {
+            let children = this.children(selector).htmlElement.filter(element => {
+                return element.matches(selector);
+            })
+
+            if (children.length() === 1) {
+                return children.get(0);
+            }
 
             return new Element(children);
         }
@@ -456,12 +494,12 @@ class Element {
     /**
      * Adds an class to the element
      *
-     * @param {String} className The name of the class youd like to add
+     * @param {String} className The name of the class you'd like to add
      *
      * @return {Element}
      */
     addClass(className) {
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             this.htmlElement.each(element => {
                 //recursively call for each element in the collection
                 element.addClass(className);
@@ -470,10 +508,10 @@ class Element {
         else {
             let hasClasses = this.htmlElement.getAttribute("class");
 
-            if( hasClasses === null || hasClasses.length == 0 ) {
+            if (hasClasses === null || hasClasses.length == 0) {
                 this.htmlElement.setAttribute("class", className);
             }
-            else if( hasClasses.indexOf(className) == -1 ) {
+            else if (hasClasses.indexOf(className) == -1) {
                 this.htmlElement.setAttribute("class", hasClasses + " " + className);
             }
         }
@@ -487,22 +525,26 @@ class Element {
      * @return {Element}
      */
     removeClass(className) {
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             this.htmlElement.each(element => {
                 //recursively call for each element in the collection
                 element.removeClass(className);
             })
         }
         else {
-            let classes = this.htmlElement.getAttribute('class');
-            let index;
-            if( classes !== null ) {
-                classes = classes.split(' ');
-                index = classes.indexOf(className);
+            className = Array.isArray(className) ? className : [className];
 
-                if( index > -1 ) {
-                    classes.splice(index, 1);
-                    this.htmlElement.setAttribute('class', classes.join(' '));
+            for (let i = 0; i < className.length; i++) {
+                let classes = this.htmlElement.getAttribute('class');
+                let index;
+                if (classes !== null) {
+                    classes = classes.split(' ');
+                    index = classes.indexOf(className[i]);
+
+                    if (index > -1) {
+                        classes.splice(index, 1);
+                        this.htmlElement.setAttribute('class', classes.join(' '));
+                    }
                 }
             }
         }
@@ -517,11 +559,13 @@ class Element {
      * @return {boolean}
      */
     hasClass(className) {
-        if( this.isCollection() ) {
-            return false;
-        }
+        if (this.isCollection()) {
+            for (let i = 0; i < this.htmlElement.length(); i++) {
+                return this.htmlElement.get(i).hasClass(className);
+            }
 
-        return this.htmlElement.getAttribute("class").indexOf(className) != -1;
+        }
+        return this.htmlElement.getAttribute('class') && this.htmlElement.getAttribute("class").indexOf(className) != -1;
     }
 
     /**
@@ -548,8 +592,8 @@ class Element {
      * @param {*} html
      */
     html(html) {
-        if( this.isCollection() ) {
-            if( html ) {
+        if (this.isCollection()) {
+            if (html) {
                 this.htmlElement.each(element => {
                     element.html(html);
                 })
@@ -559,23 +603,23 @@ class Element {
             }
         }
         else {
-            if( !html ) {
+            if (!html) {
                 return this.htmlElement.innerHTML;
             }
-            else if( typeof html == 'string' ) {
+            else if (typeof html == 'string') {
                 //Remove the entire content of this element
-                while( this.htmlElement.firstChild ) {
+                while (this.htmlElement.firstChild) {
                     this.htmlElement.removeChild(this.htmlElement.firstChild);
                 }
 
                 //fill this element with the new content
                 this.append(html);
             }
-            else if( typeof html == 'function' ) {
-                //closures can be used for html manipulations with
+            else if (typeof html == 'function') {
+                //closures can be used for html manipulations
                 let tempHtml = this.htmlElement.innerHTML;
 
-                while( this.htmlElement.firstChild ) {
+                while (this.htmlElement.firstChild) {
                     this.htmlElement.removeChild(this.htmlElement.firstChild);
                 }
 
@@ -594,20 +638,44 @@ class Element {
      * @fixme
      */
     on(ev, selector, callback) {
-        if( typeof selector == 'function' ) {
+        if (typeof selector == 'function') {
             callback = selector;
             selector = null;
         }
-        if( this.isCollection() ) {
+
+
+        if (this.isCollection()) {
             this.htmlElement.each(element => {
                 element.events.add(ev, callback, selector);
             })
         }
         else {
-            this.events.add(ev, callback, selector);
+            ev = Array.isArray(ev) ? ev : [ev];
+
+            for (let i = 0; i < ev.length; i++) {
+                this.events.add(ev[i], callback, selector);
+            }
         }
 
         return this;
+    }
+
+    /**
+     * Removes an event handler from the element
+     *
+     * @param ev
+     * @param selector
+     * @param callback
+     */
+    off(ev) {
+        if (this.isCollection()) {
+            this.htmlElement.each(element => {
+                element.events.remove(ev);
+            })
+        }
+        else {
+            this.events.remove(ev);
+        }
     }
 
     /**
@@ -615,7 +683,7 @@ class Element {
      * @param String ev
      */
     trigger(ev) {
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             this.htmlElement.each(element => {
                 element.trigger(ev);
             })
@@ -624,7 +692,7 @@ class Element {
             let event = document.createEvent('Event');
             event.initEvent(ev, true, true);
 
-            if( this.htmlElement[ev] ) {
+            if (this.htmlElement[ev]) {
                 this.htmlElement[ev].call(this.htmlElement);
             }
             else {
@@ -640,10 +708,10 @@ class Element {
      * @return {number}
      */
     length() {
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             return this.htmlElement.length();
         }
-        else if( this.htmlElement === null ) {
+        else if (this.htmlElement === null) {
             return 0;
         }
 
@@ -653,8 +721,8 @@ class Element {
     /**
      * Applies a css property to the element
      *
-     * @param {*} Object: key-object notation of property-value
-     *            String, String: The property and value of the to be applied css
+     * @param {String|Object} Object: key-object notation of property-value
+     *                        String: The property and value of the to be applied css
      *
      * @return {Element}
      *
@@ -663,24 +731,24 @@ class Element {
     css() {
         let properties = arguments;
 
-        if( Object.prototype.toString.call(arguments[0]) === '[object Object]' ) {
+        if (Object.prototype.toString.call(arguments[0]) === '[object Object]') {
             properties = arguments[0];
         }
-        else if( typeof arguments[0] === 'string' && typeof arguments[1] === 'string' ) {
+        else if (typeof arguments[0] === 'string' && typeof arguments[1] === 'string') {
             properties = {};
             properties[arguments[0]] = arguments[1];
         }
 
-        if( properties.length === 1 && typeof properties[0] == 'string' ) {
+        if (properties.length === 1 && typeof properties[0] == 'string') {
             let element = this.isCollection() ? this.htmlElement.get(0).htmlElement : this.htmlElement;
             return window.getComputedStyle(element)[properties[0]];
         }
 
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             this.htmlElement.each(element => element.css(properties));
         }
         else {
-            for( let key in properties ) {
+            for (let key in properties) {
                 this.htmlElement.style[key] = properties[key];
             }
         }
@@ -695,8 +763,8 @@ class Element {
      * @param {function} callback The callback fired when the effect is finished
      */
     fadeOut(duration = 500, easing = null, callback) {
-        if( this.isCollection() ) {
-            for( let i = 0; i < this.htmlElement.length(); i++ ) {
+        if (this.isCollection()) {
+            for (let i = 0; i < this.htmlElement.length(); i++) {
                 new FadeEffect('out', duration, this.htmlElement.get(i).htmlElement, easing);
             }
         }
@@ -706,8 +774,8 @@ class Element {
     }
 
     slideLeft(duration = 500, easing = null, callback) {
-        if( this.isCollection() ) {
-            for( let i = 0; i < this.htmlElement.length(); i++ ) {
+        if (this.isCollection()) {
+            for (let i = 0; i < this.htmlElement.length(); i++) {
                 new SlideEffect('left', duration, this.htmlElement.get(i).htmlElement, easing);
             }
         }
@@ -717,8 +785,8 @@ class Element {
     }
 
     slideUp(duration = 500, easing = null, callback) {
-        if( this.isCollection() ) {
-            for( let i = 0; i < this.htmlElement.length(); i++ ) {
+        if (this.isCollection()) {
+            for (let i = 0; i < this.htmlElement.length(); i++) {
                 this.htmlElement.get(i).css('height', '2000px');
                 new SlideEffect('up', duration, this.htmlElement.get(i).htmlElement, easing);
             }
@@ -729,6 +797,23 @@ class Element {
         }
     }
 
+    animate(css, duration, easing, callback) {
+        if (typeof easing === 'function') {
+            callback = easing;
+            easing = null;
+        }
+
+        if (this.isCollection()) {
+            for (let i = 0; i < this.htmlElement.length(); i++) {
+                new Effect(null, duration, this.htmlElement.get(i).htmlElement, easing).animate(css).then(callback);
+            }
+        }
+        else {
+            new Effect(null, duration, this.htmlElement, easing).animate(css).then(callback);
+        }
+
+    }
+
     /**
      * Returns the value of the element, if that element is an input-like element,
      *
@@ -736,17 +821,22 @@ class Element {
      *
      * @return {*}
      */
-    val(value) {
-        if( !value ) {
-            if( this.isCollection() ) {
-                return "";
+    val(value = null) {
+        if (value === null) {
+            let returnVal = '';
+            if (this.isCollection()) {
+                this.htmlElement.each(element => {
+                    returnVal += " " + element.val();
+                })
+
+                return returnVal.trim();
             }
             else {
                 return this.htmlElement.value;
             }
         }
-        else if( typeof value == 'string' ) {
-            if( this.isCollection() ) {
+        else if (typeof value == 'string') {
+            if (this.isCollection()) {
                 this.htmlElement.each(element => {
                     element.val(value);
                 })
@@ -765,10 +855,10 @@ class Element {
      * @param {String} value The value to be set as the inner text
      * @return {String|void}
      */
-    text(value) {
+    text(value = null) {
 
-        if( value ) {
-            if( this.isCollection() ) {
+        if (value !== null) {
+            if (this.isCollection()) {
                 this.htmlElement.each(element => element.text(value))
             }
             else {
@@ -777,12 +867,14 @@ class Element {
             }
         }
         else {
-            if( Collection.isCollection(this.children()) ) {
+            if (this.children().length()) {
                 let returnText = "";
 
                 this.children().each(element => {
-                    returnText += element.text();
-                })
+                    returnText += ' ' + element.text();
+                });
+
+                return returnText;
             }
             else {
                 return this.htmlElement.innerText;
@@ -794,24 +886,97 @@ class Element {
      * Selects the next element, or an element with a specific class if that is applied.
      * @param String selector
      * @return {*}
+     *
+     * @todo no selector removes the element itself
      */
     next(selector) {
-        if( this.isCollection() ) {
+        if (this.isCollection()) {
             return null;
         }
 
-        if( !selector ) {
+        if (!selector) {
             return new Element(this.htmlElement.nextSibling);
         }
         else {
             let node = this.htmlElement;
-            while( node = node.nextSibling ) {
-                if( (new Element(node)).matches(selector) ) {
+            while (node = node.nextSibling) {
+                if ((new Element(node)).matches(selector)) {
                     return new Element(node);
                 }
             }
-            return this;
         }
+
+        return new Element;
+    }
+
+    /**
+     * Serializes the form data in a URI string
+     *
+     * @param {boolean} form Whether the serialized element is a form
+     * @return {String|null} The encodes form data or null
+     */
+    serialize(form = true) {
+
+        if(!this.htmlElement) {
+            return null;
+        }
+
+        let serializedString = '';
+
+        if (this.isCollection()) {
+            this.htmlElement.each(element => {
+                serializedString += element.serialize(form);
+            })
+        }
+        else {
+            let valuesObject = {};
+
+            if (this.htmlElement.nodeName.toLowerCase() === 'form' || !form) {
+                for (let i = 0; i < this.children().length(); i++) {
+                    let input = this.children().get(i);
+                    let nodeName = input.htmlElement.nodeName.toLowerCase();
+                    let type = input.htmlElement.type;
+
+                    if (nodeName === 'input' || nodeName === 'select' || input === 'textarea') {
+                        if (type === 'file' || type === 'reset') {
+                            continue;
+                        }
+                        else if (type === 'select-multiple') {
+                            let options = input.htmlElement.option;
+
+                            for (let x = 0; x < options.length; x++) {
+                                if(options[x].selected) {
+                                    valuesObject[input.htmlElement.name] = options[x].value;
+                                }
+                            }
+                        }
+                        else {
+                            if((type !== 'checkbox' && type !== 'radio') || input.htmlElement.checked) {
+                                valuesObject[input.htmlElement.name] = input.htmlElement.value;
+                            }
+                        }
+                    }
+
+                }
+
+                return Str.toURI(valuesObject);
+            }
+
+            return null;
+        }
+    }
+
+    scrollDown() {
+        if(this.isCollection()) {
+            this.htmlElement.each(element => {
+                element.scrollDown();
+            });
+        }
+        else {
+            this.htmlElement.scrollTop = this.htmlElement.scrollHeight;
+        }
+
+        return this;
     }
 }
 

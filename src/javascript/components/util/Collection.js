@@ -15,6 +15,15 @@ class Collection {
     }
 
     /**
+     * Checks whether the to be checked element is a collection
+     * @param {*} check The to be checked element
+     * @return {boolean}
+     */
+    static isCollection(check) {
+        return check instanceof Collection;
+    }
+
+    /**
      * Gets the first index a value is located on in the collection
      *
      * @param {String} value The value that is looked for

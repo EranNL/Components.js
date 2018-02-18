@@ -1,42 +1,42 @@
 import Element from './../dom/Element';
 
 class Keyboard {
-    static register(instance, keyMap, selector) {
-        //Check whether instance is a component
+  static register(instance, keyMap, selector) {
 
-        let element = null;
-        if ( selector ) {
-            element = selector instanceof Element ? selector : new Element(selector);
-        } else {
-            element = instance.element;
+    let element = null;
+    if( selector ) {
+      element = selector instanceof Element ? selector : new Element(selector);
+    } else {
+      element = instance.element;
+    }
+
+    element.events.add('keydown', (element, event) => {
+      for( let key in keyMap ) {
+        if( this.handleKey(event) === key ) {
+          event.preventDefault();
+          return instance.__proto__[keyMap[key]] ? instance.__proto__[keyMap[key]].call(instance, instance.element, event) : false;
         }
+      }
+    });
+  }
 
-        element.events.add('keydown', (event) => {
-            for( let key in keyMap ) {
-                if( this.handleKey(event) === key ) {
-                    return instance.__proto__[keyMap[key]] ? instance.__proto__[keyMap[key]].apply(instance, [instance.element, event]) : false;
-                }
-            }
-        });
-    }
+  static handleKey(event) {
+    let keyCode = event.which || event.keyCode;
+    let key = Keyboard.KEYS[keyCode] || "";
 
-    static handleKey(event) {
-        let keyCode = event.which || event.keyCode;
-        let key = Keyboard.KEYS[keyCode] || "";
+    key = event.shiftKey ? `SHIFT_${key}` : key;
+    key = event.ctrlKey ? `CTRL_${key}` : key;
+    key = event.altKey ? `ALT_${key}` : key;
 
-        key = event.shiftKey ? `SHIFT_${key}` : key;
-        key = event.ctrlKey ? `CTRL_${key}` : key;
-        key = event.altKey ? `ALT_${key}` : key;
-
-        return key.replace(/_$/, '');
-    }
+    return key.replace(/_$/, '');
+  }
 }
 
 Keyboard.KEYS = {
-    8: 'BACKSPACE',
-    9: 'TAB',
-    13: 'ENTER',
-    27: 'ESC'
+  8: 'BACKSPACE',
+  9: 'TAB',
+  13: 'ENTER',
+  27: 'ESC'
 };
 
 export default Keyboard;
