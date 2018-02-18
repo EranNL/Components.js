@@ -333,6 +333,19 @@ class Element {
         return this;
     }
 
+    removeAttr(attr) {
+        if (this.isCollection()) {
+            this.htmlElement.each(element => {
+                element.removeAttr(attr);
+            })
+        }
+        else {
+            this.htmlElement.removeAttribute(attr);
+        }
+
+        return this;
+    }
+
     /**
      * Returns whether the htmlElement is a collection (a set of elements)
      *
@@ -880,6 +893,8 @@ class Element {
                 return this.htmlElement.innerText;
             }
         }
+
+        return this;
     }
 
     /**
