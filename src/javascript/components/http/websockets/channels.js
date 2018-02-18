@@ -16,7 +16,7 @@ export default {
     {'event': 'StaffAlert'},
   ],
   'auction': [
-    {'event': 'NewBid'},
+    {'event': 'AuctionBid'},
     {'event': 'ItemSold'},
     {'event': 'newItem'},
   ]
