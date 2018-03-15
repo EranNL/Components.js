@@ -36,28 +36,17 @@ class Node {
             return returnElements;
         }
 
-        if (context instanceof Element) {
-            context = context.getHtmlElement();
-        }
-
-        if (Collection.isCollection(selector)) {
-            //asssume that it is a collection of htmlElements
-            return selector.filter(element => {
-                return element instanceof Element;
-            });
-        }
-
         if (typeof selector === "string") {
 
             if (selector.indexOf('#') === 0) {
                 //Selector is an ID
-                returnElements.push(new Element(context.getElementById(selector.substr(1, selector.length))));
+                returnElements.push(context.getElementById(selector.substr(1, selector.length)));
             }
             else {
                 let elements = context.querySelectorAll(selector);
 
                 for (let i = 0; i < elements.length; i++) {
-                    returnElements.push(new Element(elements[i]));
+                    returnElements.push(elements[i]);
                 }
 
                 return returnElements;
@@ -66,11 +55,11 @@ class Node {
         else {
             if (selector.nodeType) {
                 //getElementById, document, document.body
-                returnElements.push(new Element(selector));
+                returnElements.push(selector);
             } else if (selector instanceof HTMLCollection) {
                 //getElementsByClassName or getElementsByClass
                 for (let i = 0; i < selector.length; i++) {
-                    returnElements.push(new Element(selector[i]));
+                    returnElements.push(selector[i]);
                 }
             }
         }
@@ -92,55 +81,28 @@ class Node {
     /**
      * Appends a htmlElement to the end of this html element
      *
-     * @param {*} toBeAppended The element/ selector that has to be appended
-     * @return {Element}
+     * @param {*} toBeCopied The element/ selector that has to be copied
+     * @return {Node}
      * @todo CLEAN UP!
      */
-    append(toBeAppended) {
-        // if (this.isCollection()) {
-        //     this.nodeList.each(element => {
-        //         element.append(toBeAppended);
-        //     });
-        //
-        //     return this;
-        // }
-        // else {
-        //     if (toBeAppended instanceof Element) {
-        //         if (toBeAppended.isCollection()) {
-        //             let html = document.createElement('div');
-        //             toBeAppended.htmlElement.each(element => {
-        //                 html.innterHtml += element.htmlElement.outerHTML;
-        //             })
-        //
-        //             while (html.firstChild) {
-        //                 this.nodeList.appendChild(html.firstChild)
-        //             }
-        //         }
-        //         else {
-        //             let html = document.createElement('div');
-        //             html.innerHTML += toBeAppended.htmlElement.outerHTML;
-        //
-        //             while (html.firstChild) {
-        //                 this.nodeList.appendChild(html.firstChild);
-        //             }
-        //         }
-        //
-        //     }
-        //     else if (typeof toBeAppended === 'string') {
-        //         let html = document.createElement('div');
-        //         html.innerHTML += toBeAppended;
-        //
-        //         while (html.firstChild) {
-        //             this.nodeList.appendChild(html.firstChild);
-        //         }
-        //     }
-        //     else {
-        //         toBeAppended = new Element(toBeAppended);
-        //         this.append(toBeAppended);
-        //     }
-        //
-        //     return this;
-        // }
+    copyAfter(toBeCopied) {
+        let html = '';
+
+        if(toBeCopied instanceof Node) {
+            toBeCopied.nodeList.each(node => {
+                html += node.outerHTML;
+            });
+        }
+        else if(typeof toBeCopied === 'string') {
+            html += toBeCopied;
+        }
+
+        this.nodeList.each(node => {
+            node.insertAdjacentHTML('beforeend', html);
+        })
+
+        return this;
+
     }
 
     appendAfter(selector) {
@@ -436,7 +398,7 @@ class Node {
 
         if (this.isCollection()) {
             this.nodeList.each(element => {
-                let children = this._select(selector, element.getHtmlElement());
+                let children = this._select(selector, element);
 
                 if (Collection.isCollection(children)) {
                     for (let i = 0; i < children.length(); i++) {
@@ -935,7 +897,7 @@ class Node {
      */
     serialize(form = true) {
 
-        if(!this.nodeList) {
+        if (!this.nodeList) {
             return null;
         }
 
@@ -963,13 +925,13 @@ class Node {
                             let options = input.htmlElement.option;
 
                             for (let x = 0; x < options.length; x++) {
-                                if(options[x].selected) {
+                                if (options[x].selected) {
                                     valuesObject[input.htmlElement.name] = options[x].value;
                                 }
                             }
                         }
                         else {
-                            if((type !== 'checkbox' && type !== 'radio') || input.htmlElement.checked) {
+                            if ((type !== 'checkbox' && type !== 'radio') || input.htmlElement.checked) {
                                 valuesObject[input.htmlElement.name] = input.htmlElement.value;
                             }
                         }
@@ -985,7 +947,7 @@ class Node {
     }
 
     scrollDown() {
-        if(this.isCollection()) {
+        if (this.isCollection()) {
             this.nodeList.each(element => {
                 element.scrollDown();
             });
