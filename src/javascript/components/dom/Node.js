@@ -1,10 +1,8 @@
-import Events from './Events.js';
-import HeightDimension from './dimensions/HeightDimension';
-import WidthDimension from './dimensions/WidthDimension';
-import FadeEffect from './effects/FadeEffect';
-import SlideEffect from './effects/SlideEffect';
-import Str from '../util/Str.js';
-import Collection from '../util/Collection';
+import Events from "./Events.js";
+import HeightDimension from "./dimensions/HeightDimension";
+import WidthDimension from "./dimensions/WidthDimension";
+import Str from "../util/Str.js";
+import Collection from "../util/Collection";
 import Effect from "./effects/Effect";
 import Element from "./Element";
 
@@ -38,7 +36,7 @@ class Node {
 
         if (typeof selector === "string") {
 
-            if (selector.indexOf('#') === 0) {
+            if (selector.indexOf("#") === 0) {
                 //Selector is an ID
                 returnElements.push(context.getElementById(selector.substr(1, selector.length)));
             }
@@ -73,7 +71,7 @@ class Node {
      * @return {Element}
      */
     static create(element) {
-        if (typeof element === 'string') {
+        if (typeof element === "string") {
             return new Node(document.createElement(element));
         }
     }
@@ -86,20 +84,20 @@ class Node {
      * @todo CLEAN UP!
      */
     copyAfter(toBeCopied) {
-        let html = '';
+        let html = "";
 
         if(toBeCopied instanceof Node) {
             toBeCopied.nodeList.each(node => {
                 html += node.outerHTML;
             });
         }
-        else if(typeof toBeCopied === 'string') {
+        else if(typeof toBeCopied === "string") {
             html += toBeCopied;
         }
 
         this.nodeList.each(node => {
-            node.insertAdjacentHTML('beforeend', html);
-        })
+            node.insertAdjacentHTML("beforeend", html);
+        });
 
         return this;
 
@@ -120,22 +118,17 @@ class Node {
      * @return {Element}
      */
     get(index = 0) {
-        if (this.isCollection()) {
-            return this.nodeList.get(index);
-        }
-        else {
-            return this;
-        }
+        return this.nodeList.get(index);
     }
 
     wrap(selector) {
         if (this.isCollection()) {
             this.nodeList.each(element => {
                 element.wrap(selector);
-            })
+            });
         }
         else {
-            let wrap = Element.create('div').before(this.nodeList);
+            let wrap = Element.create("div").before(this.nodeList);
             wrap.append(this.nodeList);
 
             this.nodeList.remove();
@@ -155,18 +148,17 @@ class Node {
     /**
      * Returns the parent of this element, or if this element is a collection:
      * all elements from each item in the collection
-     * @param selector
      * @return {Element}
      *
      * @todo match selector
      */
-    parent(selector) {
+    parent() {
         if (this.isCollection()) {
             let parentCollection = new Collection();
 
             this.nodeList.each(element => {
                 parentCollection.push(new Element(element.htmlElement.parentNode));
-            })
+            });
 
             return new Element(parentCollection);
         }
@@ -189,8 +181,8 @@ class Node {
         if (target instanceof Element) {
             if (target.isCollection()) {
                 target.htmlElement.each(element => {
-                    element.before(this)
-                })
+                    element.before(this);
+                });
             }
             else {
                 target.htmlElement.parentNode.insertBefore(this.nodeList, target.htmlElement);
@@ -208,8 +200,8 @@ class Node {
         if (target instanceof Element) {
             if (target.isCollection()) {
                 target.htmlElement.each(element => {
-                    element.after(this)
-                })
+                    element.after(this);
+                });
             }
             else {
                 target.htmlElement.parentNode.insertBefore(this.nodeList, target.htmlElement.nextSibling);
@@ -228,10 +220,10 @@ class Node {
     prepend(toBePrepended) {
         if (toBePrepended instanceof Element) {
             if (toBePrepended.isCollection()) {
-                let html = '';
+                let html = "";
                 toBePrepended.htmlElement.each(element => {
                     html += element.htmlElement.outerHTML;
-                })
+                });
                 this.nodeList.innerHTML = html + this.nodeList.innerHTML;
             }
             else {
@@ -239,7 +231,7 @@ class Node {
             }
 
         }
-        else if (typeof toBePrepended === 'string') {
+        else if (typeof toBePrepended === "string") {
             this.nodeList.innerHTML += toBePrepended;
         }
         else {
@@ -288,7 +280,7 @@ class Node {
         if (this.isCollection()) {
             this.nodeList.each(element => {
                 element.attr(attr, value);
-            })
+            });
         }
         else {
             this.nodeList.setAttribute(attr, value);
@@ -301,7 +293,7 @@ class Node {
         if (this.isCollection()) {
             this.nodeList.each(element => {
                 element.removeAttr(attr);
-            })
+            });
         }
         else {
             this.nodeList.removeAttribute(attr);
@@ -342,10 +334,10 @@ class Node {
         for (let i = 0; i < this.nodeList.attributes.length; i++) {
             let attribute = this.nodeList.attributes[i];
 
-            if (attribute.name.indexOf('data-') == 0) {
+            if (attribute.name.indexOf("data-") === 0) {
                 let name = attribute.name.substr("data-".length, attribute.name.length - 1);
 
-                if (name === 'options' && /{.*}/g.test(attribute.value)) {
+                if (name === "options" && /{.*}/g.test(attribute.value)) {
                     let values = Str.toObject(attribute.value);
 
                     for (let key in values) {
@@ -375,12 +367,12 @@ class Node {
     each(callback) {
         if (this.isCollection()) {
             for (let i = 0; i < this.nodeList.length(); i++) {
-                if (typeof callback == 'function') {
+                if (typeof callback === "function") {
                     callback(this.nodeList.get(i), i);
                 }
             }
         } else {
-            if (typeof callback == 'function') {
+            if (typeof callback === "function") {
                 callback(new Element(this.nodeList), 0);
             }
         }
@@ -406,9 +398,9 @@ class Node {
                 }
                 else {
                     //child is a single HTMLelement
-                    returnChildren.push(new Node(children))
+                    returnChildren.push(new Node(children));
                 }
-            })
+            });
 
             return new Node(returnChildren);
         }
@@ -427,25 +419,26 @@ class Node {
         let matchesElements = true;
 
         let match = function (element) {
-            if (typeof selector == 'string') {
+            if (typeof selector === "string") {
                 let matches = (window.document || window.ownerDocument).querySelectorAll(selector),
                     i = matches.length;
 
                 while (--i >= 0 && matches[i] !== (element instanceof Element ? element.htmlElement : element)) {
+                    //
                 }
                 return i > -1;
             }
             else if (selector instanceof Element) {
                 return selector.isCollection() ? false : selector.htmlElement === (element instanceof Element ? element.htmlElement : element);
             }
-        }
+        };
 
         if (this.isCollection()) {
             this.nodeList.each((element) => {
                 if (!match(element)) {
                     matchesElements = false;
                 }
-            })
+            });
         }
         else {
             return match(this.nodeList);
@@ -455,10 +448,10 @@ class Node {
     }
 
     find(selector) {
-        if (typeof selector === 'string') {
+        if (typeof selector === "string") {
             let children = this.children(selector).htmlElement.filter(element => {
                 return element.matches(selector);
-            })
+            });
 
             if (children.length() === 1) {
                 return children.get(0);
@@ -471,7 +464,7 @@ class Node {
     /**
      * Adds an class to the element
      *
-     * @param {String} className The name of the class you'd like to add
+     * @param {String} className The name of the class you"d like to add
      *
      * @return {Element}
      */
@@ -480,15 +473,15 @@ class Node {
             this.nodeList.each(element => {
                 //recursively call for each element in the collection
                 element.addClass(className);
-            })
+            });
         }
         else {
             let hasClasses = this.nodeList.getAttribute("class");
 
-            if (hasClasses === null || hasClasses.length == 0) {
+            if (hasClasses === null || hasClasses.length === 0) {
                 this.nodeList.setAttribute("class", className);
             }
-            else if (hasClasses.indexOf(className) == -1) {
+            else if (hasClasses.indexOf(className) === -1) {
                 this.nodeList.setAttribute("class", hasClasses + " " + className);
             }
         }
@@ -506,21 +499,21 @@ class Node {
             this.nodeList.each(element => {
                 //recursively call for each element in the collection
                 element.removeClass(className);
-            })
+            });
         }
         else {
             className = Array.isArray(className) ? className : [className];
 
             for (let i = 0; i < className.length; i++) {
-                let classes = this.nodeList.getAttribute('class');
+                let classes = this.nodeList.getAttribute("class");
                 let index;
                 if (classes !== null) {
-                    classes = classes.split(' ');
+                    classes = classes.split(" ");
                     index = classes.indexOf(className[i]);
 
                     if (index > -1) {
                         classes.splice(index, 1);
-                        this.nodeList.setAttribute('class', classes.join(' '));
+                        this.nodeList.setAttribute("class", classes.join(" "));
                     }
                 }
             }
@@ -542,7 +535,7 @@ class Node {
             }
 
         }
-        return this.nodeList.getAttribute('class') && this.nodeList.getAttribute("class").indexOf(className) != -1;
+        return this.nodeList.getAttribute("class") && this.nodeList.getAttribute("class").indexOf(className) !== -1;
     }
 
     /**
@@ -573,7 +566,7 @@ class Node {
             if (html) {
                 this.nodeList.each(element => {
                     element.html(html);
-                })
+                });
             }
             else {
                 return this.nodeList.get(0).htmlElement.innerHTML;
@@ -583,7 +576,7 @@ class Node {
             if (!html) {
                 return this.nodeList.innerHTML;
             }
-            else if (typeof html == 'string') {
+            else if (typeof html === "string") {
                 //Remove the entire content of this element
                 while (this.nodeList.firstChild) {
                     this.nodeList.removeChild(this.nodeList.firstChild);
@@ -592,7 +585,7 @@ class Node {
                 //fill this element with the new content
                 this.append(html);
             }
-            else if (typeof html == 'function') {
+            else if (typeof html === "function") {
                 //closures can be used for html manipulations
                 let tempHtml = this.nodeList.innerHTML;
 
@@ -615,7 +608,7 @@ class Node {
      * @fixme
      */
     on(ev, selector, callback) {
-        if (typeof selector == 'function') {
+        if (typeof selector === "function") {
             callback = selector;
             selector = null;
         }
@@ -624,7 +617,7 @@ class Node {
         if (this.isCollection()) {
             this.nodeList.each(element => {
                 element.events.add(ev, callback, selector);
-            })
+            });
         }
         else {
             ev = Array.isArray(ev) ? ev : [ev];
@@ -648,7 +641,7 @@ class Node {
         if (this.isCollection()) {
             this.nodeList.each(element => {
                 element.events.remove(ev);
-            })
+            });
         }
         else {
             this.events.remove(ev);
@@ -663,10 +656,10 @@ class Node {
         if (this.isCollection()) {
             this.nodeList.each(element => {
                 element.trigger(ev);
-            })
+            });
         }
         else {
-            let event = document.createEvent('Event');
+            let event = document.createEvent("Event");
             event.initEvent(ev, true, true);
 
             if (this.nodeList[ev]) {
@@ -708,15 +701,15 @@ class Node {
     css() {
         let properties = arguments;
 
-        if (Object.prototype.toString.call(arguments[0]) === '[object Object]') {
+        if (Object.prototype.toString.call(arguments[0]) === "[object Object]") {
             properties = arguments[0];
         }
-        else if (typeof arguments[0] === 'string' && typeof arguments[1] === 'string') {
+        else if (typeof arguments[0] === "string" && typeof arguments[1] === "string") {
             properties = {};
             properties[arguments[0]] = arguments[1];
         }
 
-        if (properties.length === 1 && typeof properties[0] == 'string') {
+        if (properties.length === 1 && typeof properties[0] === "string") {
             let element = this.isCollection() ? this.nodeList.get(0).htmlElement : this.nodeList;
             return window.getComputedStyle(element)[properties[0]];
         }
@@ -733,49 +726,8 @@ class Node {
         return this;
     }
 
-    /**
-     * Fades the element out
-     *
-     * @param {int} duration The duration of the effect in ms
-     * @param {function} callback The callback fired when the effect is finished
-     */
-    fadeOut(duration = 500, easing = null, callback) {
-        if (this.isCollection()) {
-            for (let i = 0; i < this.nodeList.length(); i++) {
-                new FadeEffect('out', duration, this.nodeList.get(i).htmlElement, easing);
-            }
-        }
-        else {
-            new FadeEffect('out', duration, this.nodeList, easing);
-        }
-    }
-
-    slideLeft(duration = 500, easing = null, callback) {
-        if (this.isCollection()) {
-            for (let i = 0; i < this.nodeList.length(); i++) {
-                new SlideEffect('left', duration, this.nodeList.get(i).htmlElement, easing);
-            }
-        }
-        else {
-            let effect = new SlideEffect('left', duration, this.nodeList, easing);
-        }
-    }
-
-    slideUp(duration = 500, easing = null, callback) {
-        if (this.isCollection()) {
-            for (let i = 0; i < this.nodeList.length(); i++) {
-                this.nodeList.get(i).css('height', '2000px');
-                new SlideEffect('up', duration, this.nodeList.get(i).htmlElement, easing);
-            }
-        }
-        else {
-            this.css({overflow: 'hidden'});
-            let effect = new SlideEffect('up', duration, this.nodeList, easing);
-        }
-    }
-
     animate(css, duration, easing, callback) {
-        if (typeof easing === 'function') {
+        if (typeof easing === "function") {
             callback = easing;
             easing = null;
         }
@@ -800,11 +752,11 @@ class Node {
      */
     val(value = null) {
         if (value === null) {
-            let returnVal = '';
+            let returnVal = "";
             if (this.isCollection()) {
                 this.nodeList.each(element => {
                     returnVal += " " + element.val();
-                })
+                });
 
                 return returnVal.trim();
             }
@@ -812,11 +764,11 @@ class Node {
                 return this.nodeList.value;
             }
         }
-        else if (typeof value == 'string') {
+        else if (typeof value === "string") {
             if (this.isCollection()) {
                 this.nodeList.each(element => {
                     element.val(value);
-                })
+                });
             }
             else {
                 this.nodeList.value = value;
@@ -836,7 +788,7 @@ class Node {
 
         if (value !== null) {
             if (this.isCollection()) {
-                this.nodeList.each(element => element.text(value))
+                this.nodeList.each(element => element.text(value));
             }
             else {
                 let text = document.createTextNode(value);
@@ -848,7 +800,7 @@ class Node {
                 let returnText = "";
 
                 this.children().each(element => {
-                    returnText += ' ' + element.text();
+                    returnText += " " + element.text();
                 });
 
                 return returnText;
@@ -878,7 +830,7 @@ class Node {
         }
         else {
             let node = this.nodeList;
-            while (node = node.nextSibling) {
+            while ((node = node.nextSibling)) {
                 if ((new Element(node)).matches(selector)) {
                     return new Element(node);
                 }
@@ -893,6 +845,8 @@ class Node {
      *
      * @param {boolean} form Whether the serialized element is a form
      * @return {String|null} The encodes form data or null
+     *
+     * @todo FIX
      */
     serialize(form = true) {
 
@@ -900,27 +854,27 @@ class Node {
             return null;
         }
 
-        let serializedString = '';
+        let serializedString = "";
 
         if (this.isCollection()) {
             this.nodeList.each(element => {
                 serializedString += element.serialize(form);
-            })
+            });
         }
         else {
             let valuesObject = {};
 
-            if (this.nodeList.nodeName.toLowerCase() === 'form' || !form) {
+            if (this.nodeList.nodeName.toLowerCase() === "form" || !form) {
                 for (let i = 0; i < this.children().length(); i++) {
                     let input = this.children().get(i);
                     let nodeName = input.htmlElement.nodeName.toLowerCase();
                     let type = input.htmlElement.type;
 
-                    if (nodeName === 'input' || nodeName === 'select' || input === 'textarea') {
-                        if (type === 'file' || type === 'reset') {
+                    if (nodeName === "input" || nodeName === "select" || input === "textarea") {
+                        if (type === "file" || type === "reset") {
                             continue;
                         }
-                        else if (type === 'select-multiple') {
+                        else if (type === "select-multiple") {
                             let options = input.htmlElement.option;
 
                             for (let x = 0; x < options.length; x++) {
@@ -930,7 +884,7 @@ class Node {
                             }
                         }
                         else {
-                            if ((type !== 'checkbox' && type !== 'radio') || input.htmlElement.checked) {
+                            if ((type !== "checkbox" && type !== "radio") || input.htmlElement.checked) {
                                 valuesObject[input.htmlElement.name] = input.htmlElement.value;
                             }
                         }
