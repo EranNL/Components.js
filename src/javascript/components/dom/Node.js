@@ -105,8 +105,12 @@ class Node {
 
     }
 
-    appendAfter(selector) {
+    moveAfter(selector) {
+        this.copyAfter(selector);
 
+        if(selector instanceof Node) {
+            selector.remove();
+        }
     }
 
     /**
@@ -266,14 +270,9 @@ class Node {
      * Removes this elememt
      */
     remove() {
-        if (this.isCollection()) {
-            this.nodeList.each(element => {
-                element.remove();
-            });
-        }
-        else {
-            this.nodeList && this.nodeList.parentNode.removeChild(this.nodeList);
-        }
+        this.nodeList.each(element => {
+            element.parentNode.removeChild(element);
+        });
     }
 
     attr(attr, value = null) {
