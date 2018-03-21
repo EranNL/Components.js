@@ -1,6 +1,5 @@
 import Component from "../components/Component";
 import Node from "../components/dom/Node";
-import Str from "../components/util/Str";
 
 class Input extends Component {
 
@@ -36,7 +35,6 @@ class Input extends Component {
      */
     applyMatch() {
         this.element.on(["keyup", "keydown"], () => {
-
             //make sure the pattern doesn't have leading or trailing slashes
             let reg = this.element.getData("match").replace(/^\/|\/$/g, "");
             let value = this.element.val();
