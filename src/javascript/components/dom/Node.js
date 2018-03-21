@@ -564,10 +564,11 @@ class Node {
         }
 
         ev = Array.isArray(ev) ? ev : [ev];
-
-        for (let i = 0; i < ev.length; i++) {
-            this.events.add(ev[i], callback, selector);
-        }
+        this.nodeList.each(element => {
+            for (let i = 0; i < ev.length; i++) {
+                this.events.add(element, ev[i], callback, selector);
+            }
+        });
 
         return this;
     }
