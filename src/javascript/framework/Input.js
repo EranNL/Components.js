@@ -1,5 +1,5 @@
-import Component from '../components/Component';
-import Element from '../components/dom/Element';
+import Component from "../components/Component";
+import Node from "../components/dom/Node";
 import Str from "../components/util/Str";
 
 class Input extends Component {
@@ -12,7 +12,7 @@ class Input extends Component {
     constructor(element) {
         super(element);
 
-        this.inheritsValue = new Element('[data-input-value="' + this.element.attr('id') + '"]');
+        this.inheritsValue = new Node(`[data-input-value='${this.element.attr("id")}']`);
 
         this.checkForChanges();
     }
@@ -23,8 +23,8 @@ class Input extends Component {
     applyErasable() {
         let parent = this.element.parent();
 
-        if (parent.hasClass('input-erasable')) {
-            parent.find('.erase').on('click', () => this.element.val(''))
+        if (parent.hasClass("input-erasable")) {
+            parent.find(".erase").on("click", () => this.element.val(""));
         }
     }
 
@@ -35,21 +35,21 @@ class Input extends Component {
      * @return void
      */
     applyMatch() {
-        this.element.on(['keyup', 'keydown'], () => {
+        this.element.on(["keyup", "keydown"], () => {
 
             //make sure the pattern doesn't have leading or trailing slashes
-            let reg = this.element.getData('match').replace(/^\/|\/$/g, '');
+            let reg = this.element.getData("match").replace(/^\/|\/$/g, "");
             let value = this.element.val();
 
             for(let i = 0; i < value.length; i++) {
                 let char = value.charAt(i);
-                if(!new RegExp(reg, 'gi').test(char)) {
+                if(!new RegExp(reg, "gi").test(char)) {
                     value = value.substr(0, i) + value.substr(i + 1);
                 }
             }
 
             this.element.val(value);
-        })
+        });
     }
 
     /**
@@ -92,10 +92,10 @@ class Input extends Component {
      * @return {void}
      */
     removeErrors() {
-        if (this.element.val().length > 0 && (this.element.parent().hasClass('has-error') || this.element.parent().hasClass('has-success'))) {
-            this.element.parent().removeClass('has-error');
-            this.element.parent().removeClass('has-success');
-            this.element.next('.help-block').remove();
+        if (this.element.val().length > 0 && (this.element.parent().hasClass("has-error") || this.element.parent().hasClass("has-success"))) {
+            this.element.parent().removeClass("has-error");
+            this.element.parent().removeClass("has-success");
+            this.element.next(".help-block").remove();
         }
     }
 
