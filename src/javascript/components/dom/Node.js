@@ -4,18 +4,21 @@ import WidthDimension from "./dimensions/WidthDimension";
 import Str from "../util/Str.js";
 import Collection from "../util/Collection";
 import Effect from "./effects/Effect";
-import Element from "./Element";
 
 class Node {
 
     constructor(element = "") {
+
+        //list of HtmlElements in the DOM matching the given element
         this.nodeList = this._select(element);
 
-        //Register a new Events instance for this element, so events are captured.
-        //But only on non-objects
-        if (!this.isCollection()) {
-            this.events = new Events(this);
-        }
+        this.events = new Events(this);
+
+        /**
+         * Determines if the element is called by just a tag
+         * @type {boolean}
+         */
+        this.isTag = false;
     }
 
     /**
@@ -34,6 +37,12 @@ class Node {
             return returnElements;
         }
 
+        if (selector instanceof Collection) {
+            returnElements = selector.filter(element => {
+                return element instanceof HTMLElement;
+            });
+        }
+
         if (typeof selector === "string") {
 
             if (selector.indexOf("#") === 0) {
@@ -41,6 +50,10 @@ class Node {
                 returnElements.push(context.getElementById(selector.substr(1, selector.length)));
             }
             else {
+                if (selector.indexOf(".") !== 0) {
+                    this.isTag = true;
+                }
+
                 let elements = context.querySelectorAll(selector);
 
                 for (let i = 0; i < elements.length; i++) {
@@ -86,12 +99,12 @@ class Node {
     copyAfter(toBeCopied) {
         let html = "";
 
-        if(toBeCopied instanceof Node) {
+        if (toBeCopied instanceof Node) {
             toBeCopied.nodeList.each(node => {
                 html += node.outerHTML;
             });
         }
-        else if(typeof toBeCopied === "string") {
+        else if (typeof toBeCopied === "string") {
             html += toBeCopied;
         }
 
@@ -106,7 +119,7 @@ class Node {
     moveAfter(selector) {
         this.copyAfter(selector);
 
-        if(selector instanceof Node) {
+        if (selector instanceof Node) {
             selector.remove();
         }
     }
@@ -122,17 +135,12 @@ class Node {
     }
 
     wrap(selector) {
-        if (this.isCollection()) {
-            this.nodeList.each(element => {
-                element.wrap(selector);
-            });
-        }
-        else {
-            let wrap = Element.create("div").before(this.nodeList);
-            wrap.append(this.nodeList);
+        this.nodeList.each(element => {
+            let wrap = Element.create("div").moveBefore(this.nodeList);
+            wrap.append(element);
 
-            this.nodeList.remove();
-        }
+            element.remove();
+        });
     }
 
     not(selector) {
@@ -153,18 +161,13 @@ class Node {
      * @todo match selector
      */
     parent() {
-        if (this.isCollection()) {
-            let parentCollection = new Collection();
+        let parentCollection = new Collection();
 
-            this.nodeList.each(element => {
-                parentCollection.push(new Element(element.htmlElement.parentNode));
-            });
+        this.nodeList.each(element => {
+            parentCollection.push(element.parentNode);
+        });
 
-            return new Element(parentCollection);
-        }
-        else {
-            return new Element(this.nodeList.parentNode);
-        }
+        return new Node(parentCollection);
     }
 
     /**
@@ -269,21 +272,12 @@ class Node {
 
     attr(attr, value = null) {
         if (!value) {
-            if (this.isCollection()) {
-                return this.nodeList.length() ? this.nodeList.get(0).htmlElement.getAttribute(attr) : null;
-            }
-            else {
-                return this.nodeList && this.nodeList.getAttribute(attr);
-            }
-        }
-
-        if (this.isCollection()) {
-            this.nodeList.each(element => {
-                element.attr(attr, value);
-            });
+            return this.nodeList.length() ? this.nodeList.get(0).getAttribute(attr) : null;
         }
         else {
-            this.nodeList.setAttribute(attr, value);
+            this.nodeList.each(element => {
+                element.setAttribute(attr, value);
+            });
         }
 
         return this;
@@ -324,15 +318,14 @@ class Node {
      *                Object: when returning the whole options object
      */
     getData(attribute = null) {
-        if (!this.nodeList || this.isCollection()) {
-            return null;
-        }
 
         let returnData = {};
         //@todo: retrieve data from localStorage
 
-        for (let i = 0; i < this.nodeList.attributes.length; i++) {
-            let attribute = this.nodeList.attributes[i];
+        let first = this.nodeList.first();
+
+        for (let i = 0; i < first.attributes.length; i++) {
+            let attribute = first.attributes[i];
 
             if (attribute.name.indexOf("data-") === 0) {
                 let name = attribute.name.substr("data-".length, attribute.name.length - 1);
@@ -365,91 +358,61 @@ class Node {
      * @return {void}
      */
     each(callback) {
-        if (this.isCollection()) {
+        if (typeof callback === "function") {
             for (let i = 0; i < this.nodeList.length(); i++) {
-                if (typeof callback === "function") {
-                    callback(this.nodeList.get(i), i);
-                }
-            }
-        } else {
-            if (typeof callback === "function") {
-                callback(new Element(this.nodeList), 0);
+                callback(new Node(this.nodeList.get(i)), i);
             }
         }
     }
 
     /**
      * Gets the children for this element.
-     * @returns {Element}
+     *
+     * @param {String|Node} selector Selector to filter the children elements
+     * @returns {Collection}
      *
      * @todo Needs cleaning up
      */
     children(selector = "*") {
         let returnChildren = new Collection();
 
-        if (this.isCollection()) {
-            this.nodeList.each(element => {
-                let children = this._select(selector, element);
 
-                if (Collection.isCollection(children)) {
-                    for (let i = 0; i < children.length(); i++) {
-                        returnChildren.push(children.get(i));
-                    }
-                }
-                else {
-                    //child is a single HTMLelement
-                    returnChildren.push(new Node(children));
-                }
-            });
+        //O^2
+        this.nodeList.each(element => {
+            let children = element.querySelectorAll(selector);
 
-            return new Node(returnChildren);
-        }
-        else {
-            return new Node(this._select(selector, this.nodeList));
-        }
+            for (let i = 0; i < children.length; i++) {
+                if (children[i].matches(selector)) {
+                    returnChildren.push(children[i]);
+                }
+            }
+        });
+
+        return new Node(returnChildren);
 
     }
 
     /**
      * Checks whether the element(s) match(es) a specific selector
+     *
      * @param {string} selector The selector to be matched
      * @return {boolean} True: The selector matches the (set of) element(s)
      */
     matches(selector) {
-        let matchesElements = true;
+        let matchesElements = false;
 
-        let match = function (element) {
-            if (typeof selector === "string") {
-                let matches = (window.document || window.ownerDocument).querySelectorAll(selector),
-                    i = matches.length;
-
-                while (--i >= 0 && matches[i] !== (element instanceof Element ? element.htmlElement : element)) {
-                    //
-                }
-                return i > -1;
+        this.nodeList.each(element => {
+            if (element === selector || element.matches(selector)) {
+                matchesElements = true;
             }
-            else if (selector instanceof Element) {
-                return selector.isCollection() ? false : selector.htmlElement === (element instanceof Element ? element.htmlElement : element);
-            }
-        };
-
-        if (this.isCollection()) {
-            this.nodeList.each((element) => {
-                if (!match(element)) {
-                    matchesElements = false;
-                }
-            });
-        }
-        else {
-            return match(this.nodeList);
-        }
+        });
 
         return matchesElements;
     }
 
     find(selector) {
         if (typeof selector === "string") {
-            let children = this.children(selector).htmlElement.filter(element => {
+            let children = this.children(selector).filter(element => {
                 return element.matches(selector);
             });
 
@@ -457,7 +420,7 @@ class Node {
                 return children.get(0);
             }
 
-            return new Element(children);
+            return new Node(children);
         }
     }
 
@@ -613,18 +576,10 @@ class Node {
             selector = null;
         }
 
+        ev = Array.isArray(ev) ? ev : [ev];
 
-        if (this.isCollection()) {
-            this.nodeList.each(element => {
-                element.events.add(ev, callback, selector);
-            });
-        }
-        else {
-            ev = Array.isArray(ev) ? ev : [ev];
-
-            for (let i = 0; i < ev.length; i++) {
-                this.events.add(ev[i], callback, selector);
-            }
+        for (let i = 0; i < ev.length; i++) {
+            this.events.add(ev[i], callback, selector);
         }
 
         return this;
@@ -746,33 +701,23 @@ class Node {
     /**
      * Returns the value of the element, if that element is an input-like element,
      *
-     * @param String value The value to be set to the element
+     * @param {String} value The value to be set to the element
      *
      * @return {*}
      */
     val(value = null) {
         if (value === null) {
             let returnVal = "";
-            if (this.isCollection()) {
-                this.nodeList.each(element => {
-                    returnVal += " " + element.val();
-                });
+            this.nodeList.each(element => {
+                returnVal += " " + element.value;
+            });
 
-                return returnVal.trim();
-            }
-            else {
-                return this.nodeList.value;
-            }
+            return returnVal.trim();
         }
         else if (typeof value === "string") {
-            if (this.isCollection()) {
-                this.nodeList.each(element => {
-                    element.val(value);
-                });
-            }
-            else {
-                this.nodeList.value = value;
-            }
+            this.nodeList.each(element => {
+                element.value = value;
+            });
         }
 
         return this;
