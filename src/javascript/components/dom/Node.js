@@ -432,22 +432,16 @@ class Node {
      * @return {Element}
      */
     addClass(className) {
-        if (this.isCollection()) {
-            this.nodeList.each(element => {
-                //recursively call for each element in the collection
-                element.addClass(className);
-            });
-        }
-        else {
-            let hasClasses = this.nodeList.getAttribute("class");
+        this.nodeList.each(element => {
+            let hasClasses = element.getAttribute("class");
 
             if (hasClasses === null || hasClasses.length === 0) {
-                this.nodeList.setAttribute("class", className);
+                element.setAttribute("class", className);
             }
             else if (hasClasses.indexOf(className) === -1) {
-                this.nodeList.setAttribute("class", hasClasses + " " + className);
+                element.setAttribute("class", hasClasses + " " + className);
             }
-        }
+        });
 
         return this;
     }
@@ -458,18 +452,13 @@ class Node {
      * @return {Element}
      */
     removeClass(className) {
-        if (this.isCollection()) {
-            this.nodeList.each(element => {
-                //recursively call for each element in the collection
-                element.removeClass(className);
-            });
-        }
-        else {
-            className = Array.isArray(className) ? className : [className];
+        className = Array.isArray(className) ? className : [className];
+
+        this.nodeList.each(element => {
+            let classes = element.getAttribute("class"),
+                index;
 
             for (let i = 0; i < className.length; i++) {
-                let classes = this.nodeList.getAttribute("class");
-                let index;
                 if (classes !== null) {
                     classes = classes.split(" ");
                     index = classes.indexOf(className[i]);
@@ -480,7 +469,7 @@ class Node {
                     }
                 }
             }
-        }
+        });
 
         return this;
     }
@@ -492,13 +481,11 @@ class Node {
      * @return {boolean}
      */
     hasClass(className) {
-        if (this.isCollection()) {
-            for (let i = 0; i < this.nodeList.length(); i++) {
-                return this.nodeList.get(i).hasClass(className);
+        this.nodeList.each(element => {
+            if(element.getAttribute("class") && this.nodeList.getAttribute("class").indexOf(className) !== -1) {
+                return true;
             }
-
-        }
-        return this.nodeList.getAttribute("class") && this.nodeList.getAttribute("class").indexOf(className) !== -1;
+        });
     }
 
     /**
