@@ -173,14 +173,16 @@ class Node {
         return this.nodeList.get(index);
     }
 
+    /**
+     * Filters the nodeList and returns the elements not matching the selector
+     * @param selector
+     */
     not(selector) {
-        if (this.isCollection()) {
-            let newCollection = this.nodeList.filter(element => {
-                return !element.matches(selector);
-            });
+        let newCollection = this.nodeList.filter(node => {
+            return !node.matches(selector);
+        });
 
-            return new Node(newCollection);
-        }
+        return new Node(newCollection);
     }
 
     /**
@@ -316,10 +318,9 @@ class Node {
     children(selector = "*") {
         let returnChildren = new Collection();
 
-
         //O^2
         this.nodeList.each(element => {
-            let children = element.querySelectorAll(selector);
+            let children = element.children;
 
             for (let i = 0; i < children.length; i++) {
                 if (children[i].matches(selector)) {
@@ -350,18 +351,26 @@ class Node {
         return matchesElements;
     }
 
+    /**
+     * Finds recursively all children matching the selector
+     *
+     * @param {String} selector
+     */
     find(selector) {
-        if (typeof selector === "string") {
-            let children = this.children(selector).filter(element => {
-                return element.matches(selector);
-            });
+        let returnChildren = new Collection();
 
-            if (children.length() === 1) {
-                return children.get(0);
+        //O^2
+        this.nodeList.each(element => {
+            let children = element.querySelectorAll(selector);
+
+            for (let i = 0; i < children.length; i++) {
+                if (children[i].matches(selector)) {
+                    returnChildren.push(children[i]);
+                }
             }
+        });
 
-            return new Node(children);
-        }
+        return new Node(returnChildren);
     }
 
     /**
@@ -559,14 +568,7 @@ class Node {
      * @return {number}
      */
     length() {
-        if (this.isCollection()) {
-            return this.nodeList.length();
-        }
-        else if (this.nodeList === null) {
-            return 0;
-        }
-
-        return 1;
+        return this.nodeList.length();
     }
 
     /**
