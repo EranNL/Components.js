@@ -686,29 +686,21 @@ class Node {
 
     /**
      * Selects the next element, or an element with a specific class if that is applied.
-     * @param String selector
-     * @return {*}
+     * @param {string} selector Only next elements matching this selector are returned
+     * @return {Node}
      *
-     * @todo no selector removes the element itself
      */
-    next(selector) {
-        if (this.isCollection()) {
-            return null;
-        }
+    next(selector = "*") {
 
-        if (!selector) {
-            return new Node(this.nodeList.nextSibling);
-        }
-        else {
-            let node = this.nodeList;
-            while ((node = node.nextSibling)) {
-                if ((new Node(node)).matches(selector)) {
-                    return new Node(node);
-                }
+        let nextNodes = new Collection();
+
+        this.nodeList.each(node => {
+            if(node.nextElementSibling && node.nextElementSibling.matches(selector)) {
+                nextNodes.push(node.nextElementSibling);
             }
-        }
+        });
 
-        return new Node;
+        return new Node(nextNodes);
     }
 
     /**
