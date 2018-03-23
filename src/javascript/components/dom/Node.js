@@ -90,38 +90,77 @@ class Node {
     }
 
     /**
-     * Appends a htmlElement to the end of this html element
+     * Clones all the nodes in nodeList, along with their children
      *
-     * @param {*} toBeCopied The element/ selector that has to be copied
      * @return {Node}
-     * @todo CLEAN UP!
      */
-    copyAfter(toBeCopied) {
-        let html = "";
-
-        if (toBeCopied instanceof Node) {
-            toBeCopied.nodeList.each(node => {
-                html += node.outerHTML;
-            });
-        }
-        else if (typeof toBeCopied === "string") {
-            html += toBeCopied;
-        }
+    clone() {
+        let clonedNodes = new Collection();
 
         this.nodeList.each(node => {
-            node.insertAdjacentHTML("beforeend", html);
+            let clone = node.cloneNode(true);
+            clonedNodes.push(clone);
         });
 
-        return this;
-
+        return new Node(clonedNodes);
     }
 
-    moveAfter(selector) {
-        this.copyAfter(selector);
+    /**
+     * Appends a htmlElement to the end of this html element
+     *
+     * @param {Node|String} target The element after which the elements will be copied
+     * @return {void}
+     */
+    copyAfter(target) {
+        this.copy("afterend", target);
+    }
 
-        if (selector instanceof Node) {
-            selector.remove();
+    /**
+     * Copies all the elements in de nodeList before the target element
+     *
+     * @param {Node|string} target The element before which the elements will be copied
+     * @return {void}
+     */
+    copyBefore(target) {
+        this.copy("beforebegin", target);
+    }
+
+    /**
+     * Copies all the elements to the given position
+     *
+     * @param {string} where The position to be copied to
+     * @param {Node|string} target the element to be copied
+     */
+    copy(where, target) {
+        if (typeof target === "string") {
+            target = new Node(target);
         }
+
+        this.clone().nodeList.each(node => {
+            target.nodeList.each(targetnode => {
+                targetnode.insertAdjacentElement(where, node);
+            });
+        });
+    }
+
+    /**
+     * Moves all the elements in de nodeList after the target element
+     * @param {Node|string} target The element after which the elements will be moved
+     */
+    moveAfter(target) {
+        this.copyAfter(target);
+
+        this.remove();
+    }
+
+    /**
+     * Moves all the elements in the nodeList before the target element
+     * @param {Node|string} target The element before which the elements will be moved
+     */
+    moveBefore(target) {
+        this.copyBefore(target);
+
+        this.remove();
     }
 
     /**
@@ -132,15 +171,6 @@ class Node {
      */
     get(index = 0) {
         return this.nodeList.get(index);
-    }
-
-    wrap(selector) {
-        this.nodeList.each(element => {
-            let wrap = Element.create("div").moveBefore(this.nodeList);
-            wrap.append(element);
-
-            element.remove();
-        });
     }
 
     not(selector) {
@@ -168,97 +198,6 @@ class Node {
         });
 
         return new Node(parentCollection);
-    }
-
-    /**
-     * Insert this element before the target element
-     *
-     * @param {*} target
-     * @return {Element}
-     */
-    before(target) {
-        if (this.isCollection()) {
-            return;
-        }
-
-        if (target instanceof Element) {
-            if (target.isCollection()) {
-                target.htmlElement.each(element => {
-                    element.before(this);
-                });
-            }
-            else {
-                target.htmlElement.parentNode.insertBefore(this.nodeList, target.htmlElement);
-            }
-        }
-
-        return this;
-    }
-
-    after(target) {
-        if (this.isCollection()) {
-            return;
-        }
-
-        if (target instanceof Element) {
-            if (target.isCollection()) {
-                target.htmlElement.each(element => {
-                    element.after(this);
-                });
-            }
-            else {
-                target.htmlElement.parentNode.insertBefore(this.nodeList, target.htmlElement.nextSibling);
-            }
-        }
-
-        return this;
-    }
-
-    /**
-     * Adds an element as the first childnode of this element
-     * @param {*} toBePrepended
-     *
-     * @todo: fix events
-     */
-    prepend(toBePrepended) {
-        if (toBePrepended instanceof Element) {
-            if (toBePrepended.isCollection()) {
-                let html = "";
-                toBePrepended.htmlElement.each(element => {
-                    html += element.htmlElement.outerHTML;
-                });
-                this.nodeList.innerHTML = html + this.nodeList.innerHTML;
-            }
-            else {
-                this.nodeList.innerHTML = toBePrepended.htmlElement.outerHTML + this.nodeList.innerHTML;
-            }
-
-        }
-        else if (typeof toBePrepended === "string") {
-            this.nodeList.innerHTML += toBePrepended;
-        }
-        else {
-            toBePrepended = new Element(toBePrepended);
-            this.append(toBePrepended);
-        }
-    }
-
-    appendTo(selector) {
-        if (selector instanceof Element) {
-            if (selector.isCollection()) {
-                selector.each(element => {
-                    element.append(this.nodeList);
-                });
-            }
-            else {
-                selector.append(this.nodeList);
-            }
-        }
-        else {
-            new Element(selector).append(this);
-        }
-
-        return this;
     }
 
     /**
@@ -637,7 +576,7 @@ class Node {
      * @param {String|Object} Object: key-object notation of property-value
      *                        String: The property and value of the to be applied css
      *
-     * @return {Element}
+     * @return {String|Element}
      *
      * Todo Fix CSS properties by argument, instead of object
      */
