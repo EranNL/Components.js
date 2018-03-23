@@ -578,33 +578,32 @@ class Node {
      *                        String: The property and value of the to be applied css
      *
      * @return {String|Node}
-     *
-     * Todo Fix CSS properties by argument, instead of object
      */
     css() {
-        let properties = arguments;
+        let properties = {};
 
-        if (Object.prototype.toString.call(arguments[0]) === "[object Object]") {
-            properties = arguments[0];
+        if(arguments.length === 1 && Str.isString(arguments[0])) {
+            if(this.nodeList.length()) {
+                let number = window.getComputedStyle(this.nodeList.get(0))[arguments[0]].replace("px", "");
+
+                return isNaN(number) ? number : parseFloat(number);
+            }
+
+            return null;
         }
-        else if (typeof arguments[0] === "string" && typeof arguments[1] === "string") {
-            properties = {};
+        else if (arguments.length === 2 && Str.isString(arguments[0]) && Str.isString(arguments[1])) {
             properties[arguments[0]] = arguments[1];
         }
-
-        if (properties.length === 1 && typeof properties[0] === "string") {
-            let element = this.isCollection() ? this.nodeList.get(0).htmlElement : this.nodeList;
-            return window.getComputedStyle(element)[properties[0]];
+        else if(arguments[0] === new Object(arguments[0])) {
+            //if the argument is an object, retrieve this object
+            properties = arguments[0];
         }
 
-        if (this.isCollection()) {
-            this.nodeList.each(element => element.css(properties));
-        }
-        else {
+        this.nodeList.each(node => {
             for (let key in properties) {
-                this.nodeList.style[key] = properties[key];
+                node.style[key] = properties[key];
             }
-        }
+        });
 
         return this;
     }
