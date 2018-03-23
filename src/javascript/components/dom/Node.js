@@ -81,7 +81,7 @@ class Node {
     /**
      * Create an element in the DOM. The element can be seen after appending it to an other element
      * @param {String} element The node that has to be created
-     * @return {Element}
+     * @return {Node}
      */
     static create(element) {
         if (typeof element === "string") {
@@ -167,7 +167,7 @@ class Node {
      * Get a specific element in the collection
      *
      * @param {number} index The index of the element in the collection
-     * @return {Element}
+     * @return {HTMLElement}
      */
     get(index = 0) {
         return this.nodeList.get(index);
@@ -179,14 +179,15 @@ class Node {
                 return !element.matches(selector);
             });
 
-            return new Element(newCollection);
+            return new Node(newCollection);
         }
     }
 
     /**
      * Returns the parent of this element, or if this element is a collection:
      * all elements from each item in the collection
-     * @return {Element}
+     *
+     * @return {Node}
      *
      * @todo match selector
      */
@@ -367,8 +368,7 @@ class Node {
      * Adds an class to the element
      *
      * @param {String} className The name of the class you"d like to add
-     *
-     * @return {Element}
+     * @return {Node}
      */
     addClass(className) {
         this.nodeList.each(element => {
@@ -387,8 +387,9 @@ class Node {
 
     /**
      * Removes the given classname if the element has this class
+     *
      * @param className
-     * @return {Element}
+     * @return {Node}
      */
     removeClass(className) {
         className = Array.isArray(className) ? className : [className];
@@ -404,7 +405,7 @@ class Node {
 
                     if (index > -1) {
                         classes.splice(index, 1);
-                        this.nodeList.setAttribute("class", classes.join(" "));
+                        element.setAttribute("class", classes.join(" "));
                     }
                 }
             }
@@ -489,12 +490,10 @@ class Node {
 
     /**
      * Event handler to listen to events occuring on the element and then executing a callback
-     * @param {*} ev String: The name of the event
-     *               Array: List of events
+     * @param {String|array} ev String: The name of the event
+     *                          Array: List of events
      * @param {Function} callback
-     * @return {Element}
-     *
-     * @fixme
+     * @return {Node}
      */
     on(ev, selector, callback) {
         if (typeof selector === "function") {
@@ -576,7 +575,7 @@ class Node {
      * @param {String|Object} Object: key-object notation of property-value
      *                        String: The property and value of the to be applied css
      *
-     * @return {String|Element}
+     * @return {String|Node}
      *
      * Todo Fix CSS properties by argument, instead of object
      */
@@ -698,18 +697,18 @@ class Node {
         }
 
         if (!selector) {
-            return new Element(this.nodeList.nextSibling);
+            return new Node(this.nodeList.nextSibling);
         }
         else {
             let node = this.nodeList;
             while ((node = node.nextSibling)) {
-                if ((new Element(node)).matches(selector)) {
-                    return new Element(node);
+                if ((new Node(node)).matches(selector)) {
+                    return new Node(node);
                 }
             }
         }
 
-        return new Element;
+        return new Node;
     }
 
     /**
