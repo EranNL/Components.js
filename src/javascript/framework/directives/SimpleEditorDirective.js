@@ -6,8 +6,8 @@ class SimpleEditorDirective extends Directive {
     }
 
     init() {
-        CKEDITOR.replace(this.element.attr('id'), {
-            toolbar : "Basic",
+        CKEDITOR.replace(this.element.attr("id"), {
+            toolbar : "Basic"
         });
     }
 }
