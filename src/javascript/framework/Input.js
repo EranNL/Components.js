@@ -90,10 +90,12 @@ class Input extends Component {
      * @return {void}
      */
     removeErrors() {
-        if (this.element.val().length > 0 && (this.element.parent().hasClass("has-error") || this.element.parent().hasClass("has-success"))) {
-            this.element.parent().removeClass("has-error");
-            this.element.parent().removeClass("has-success");
-            this.element.next(".help-block").remove();
+        let parent = this.element.parent();
+
+        if (this.element.val().length > 0 && (parent.hasClass("has-error") || parent.hasClass("has-success"))) {
+            parent.removeClass("has-error");
+            parent.removeClass("has-success");
+            parent.find(".help-block").remove();
         }
     }
 
