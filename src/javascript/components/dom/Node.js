@@ -164,13 +164,48 @@ class Node {
     }
 
     /**
+     * Appends an html string to the elements in the nodelist
+     *
+     * @param html
+     * @returns {Node}
+     */
+    append(html) {
+        this.nodeList.each(node => {
+            node.insertAdjacentHTML("beforeend", html);
+        });
+
+        return this;
+    }
+
+    /**
+     * Appends the node to the target (node)
+     *
+     * @param {Node|string} target The target node
+     * @returns {Node}
+     */
+    appendTo(target) {
+        if(typeof target === "string") {
+            target = new Node(target);
+        }
+
+        target.nodeList.each(targetnode => {
+            this.nodeList.each(node => {
+                targetnode.insertAdjacentElement("beforeend", node);
+            });
+        });
+
+        return this;
+    }
+
+    /**
      * Get a specific element in the collection
      *
      * @param {number} index The index of the element in the collection
+     * @param {bool} as_node Whether the returned element should be a node
      * @return {HTMLElement}
      */
-    get(index = 0) {
-        return this.nodeList.get(index);
+    get(index = 0, as_node = false) {
+        return !as_node ? this.nodeList.get(index) : new Node(this.nodeList.get(index));
     }
 
     /**
@@ -430,11 +465,14 @@ class Node {
      * @return {boolean}
      */
     hasClass(className) {
-        this.nodeList.each(element => {
-            if(element.getAttribute("class") && this.nodeList.getAttribute("class").indexOf(className) !== -1) {
-                return true;
+        let has = false;
+        this.nodeList.each(node => {
+            if(node.getAttribute("class") && node.getAttribute("class").indexOf(className) !== -1) {
+                has = true;
             }
         });
+
+        return has;
     }
 
     /**
@@ -528,14 +566,11 @@ class Node {
      * @param callback
      */
     off(ev) {
-        if (this.isCollection()) {
-            this.nodeList.each(element => {
-                element.events.remove(ev);
-            });
-        }
-        else {
-            this.events.remove(ev);
-        }
+        this.nodeList.each(node => {
+            this.events.remove(node, ev);
+        });
+
+        return this;
     }
 
     /**
@@ -614,14 +649,10 @@ class Node {
             easing = null;
         }
 
-        if (this.isCollection()) {
-            for (let i = 0; i < this.nodeList.length(); i++) {
-                new Effect(null, duration, this.nodeList.get(i).htmlElement, easing).animate(css).then(callback);
-            }
-        }
-        else {
-            new Effect(null, duration, this.nodeList, easing).animate(css).then(callback);
-        }
+        this.nodeList.each(node => {
+            new Effect(null, duration, node, easing).animate(css).then(callback);
+        });
+
 
     }
 
@@ -659,13 +690,10 @@ class Node {
     text(value = null) {
 
         if (value !== null) {
-            if (this.isCollection()) {
-                this.nodeList.each(element => element.text(value));
-            }
-            else {
+            this.nodeList.each(node => {
                 let text = document.createTextNode(value);
-                this.nodeList.innerHTML = text.textContent;
-            }
+                node.innerHTML = text.textContent;
+            });
         }
         else {
             if (this.children().length()) {
@@ -714,53 +742,40 @@ class Node {
      */
     serialize(form = true) {
 
-        if (!this.nodeList) {
-            return null;
-        }
-
         let serializedString = "";
+        let valuesObject = {};
 
-        if (this.isCollection()) {
-            this.nodeList.each(element => {
-                serializedString += element.serialize(form);
-            });
-        }
-        else {
-            let valuesObject = {};
+        if (this.matches("form") || !form) {
+            let formelements = this.find("input, textarea, select");
+            for (let i = 0; i < formelements.length(); i++) {
+                let input = formelements.get(i);
+                let nodeName = input.nodeName.toLowerCase();
+                let type = input.type;
 
-            if (this.nodeList.nodeName.toLowerCase() === "form" || !form) {
-                for (let i = 0; i < this.children().length(); i++) {
-                    let input = this.children().get(i);
-                    let nodeName = input.htmlElement.nodeName.toLowerCase();
-                    let type = input.htmlElement.type;
+                if (nodeName === "input" || nodeName === "select" || input === "textarea") {
+                    if (type === "file" || type === "reset") {
+                    }
+                    else if (type === "select-multiple") {
+                        let options = input.option;
 
-                    if (nodeName === "input" || nodeName === "select" || input === "textarea") {
-                        if (type === "file" || type === "reset") {
-                            continue;
-                        }
-                        else if (type === "select-multiple") {
-                            let options = input.htmlElement.option;
-
-                            for (let x = 0; x < options.length; x++) {
-                                if (options[x].selected) {
-                                    valuesObject[input.htmlElement.name] = options[x].value;
-                                }
-                            }
-                        }
-                        else {
-                            if ((type !== "checkbox" && type !== "radio") || input.htmlElement.checked) {
-                                valuesObject[input.htmlElement.name] = input.htmlElement.value;
+                        for (let x = 0; x < options.length; x++) {
+                            if (options[x].selected) {
+                                valuesObject[input.htmlElement.name] = options[x].value;
                             }
                         }
                     }
-
+                    else {
+                        if ((type !== "checkbox" && type !== "radio") || input.checked) {
+                            valuesObject[input.name] = input.value;
+                        }
+                    }
                 }
-
-                return Str.toURI(valuesObject);
             }
 
-            return null;
+            return Str.toURI(valuesObject);
         }
+
+        return null;
     }
 
     scrollDown() {
