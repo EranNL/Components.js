@@ -1,4 +1,3 @@
-
 import Directive from "./Directive";
 
 class SimpleEditorDirective extends Directive {
@@ -7,8 +6,8 @@ class SimpleEditorDirective extends Directive {
     }
 
     init() {
-        CKEDITOR.replace( this.element.attr('id'), {
-            toolbar : 'Basic',
+        CKEDITOR.replace(this.element.attr('id'), {
+            toolbar : "Basic",
         });
     }
 }
