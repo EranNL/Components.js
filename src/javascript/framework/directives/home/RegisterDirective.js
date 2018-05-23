@@ -1,5 +1,5 @@
 import Directive from "../Directive";
-import Element from "../../../components/dom/Element";
+import Node from "../../../components/dom/Node";
 import HTTPRequest from "../../../components/http/HTTPRequest";
 import Keyboard from "../../../components/util/Keyboard";
 
@@ -9,19 +9,19 @@ class RegisterDirective extends Directive {
 
 
         this.stage = 0;
-        this.avatar = this.element.find('.user');
-        this.tile = this.element.find('.tile');
-        this.glow = this.element.find('.spotlight');
-        this.modal = this.element.find('.stage-modal');
+        this.avatar = this.element.find(".user");
+        this.tile = this.element.find(".tile");
+        this.glow = this.element.find(".spotlight");
+        this.modal = this.element.find(".stage-modal");
         this.background = null;
-        this.gender = 'm';
+        this.gender = "m";
 
-        new Element('.next').on('click', this.checkStage.bind(this));
-        new Element('.previous').on('click', this.previousStage.bind(this));
-        new Element('.finish').on('click', this.finishRegistration.bind(this));
+        new Node(".next").on("click", this.checkStage.bind(this));
+        new Node(".previous").on("click", this.previousStage.bind(this));
+        new Node(".finish").on("click", this.finishRegistration.bind(this));
 
         Keyboard.register(this, {
-            'ENTER': 'checkStage'
+            "ENTER": "checkStage"
         }, document);
 
         this.updateButtons();
@@ -30,17 +30,16 @@ class RegisterDirective extends Directive {
     }
 
     updateButtons() {
-        let previous = this.element.find('.previous');
-        previous.css({display: 'none'});
+        let previous = this.element.find(".previous");
+        previous.css({display: "none"});
 
         if (this.stage > 0) {
-            previous.css({display: 'inline'});
+            previous.css({display: "inline"});
         }
     }
 
     startStage() {
-        console.log('hier komt ie dus wel');
-        this.avatar.animate({top: '519px'}, 1500, 'ease-out', () => {
+        this.avatar.animate({top: "519px"}, 1500, "ease-out", () => {
             this.walkToDesk();
         });
 
@@ -48,15 +47,16 @@ class RegisterDirective extends Directive {
 
     walkToDesk() {
         this.avatar
-            .css({background: 'url("../assets/images/register/walking_avatar.gif")'})
-            .animate({left: '415px', top: '430px'}, 2500, 'ease-out', () => {
+
+            .css({background: "url('../assets/images/register/walking_avatar.gif')"})
+            .animate({left: "415px", top: "430px"}, 2500, "ease-out", () => {
                 this.standForDesk();
             });
     }
 
     standForDesk() {
         this.avatar
-            .css({background: 'url("../assets/images/register/standing_avatar.gif")'});
+            .css({background: "url('../assets/images/register/standing_avatar.gif')"});
 
         this.tile.animate({opacity: 1}, 500);
         this.glow.animate({opacity: 1}, 500, () => {
@@ -65,10 +65,10 @@ class RegisterDirective extends Directive {
     }
 
     initStage() {
-        this.background = this.element.find('.modal-background');
+        this.background = this.element.find(".modal-background");
         this.background
-            .addClass('modal-background')
-            .appendTo('.room')
+            .addClass("modal-background")
+            .appendTo(".room")
             .animate({opacity: 1}, 500, () => {
                 this.modal.animate({opacity: 1}, 500, () => {
                     this.loadStage(0);
@@ -77,23 +77,23 @@ class RegisterDirective extends Directive {
     }
 
     loadStage(stage) {
-        let stages = this.modal.find('.stage');
-        let indicators = this.modal.find('.stage-indicators').find('.stage-indicator');
+        let stages = this.modal.find(".stage");
+        let indicators = this.modal.find(".stage-indicators").find(".stage-indicator");
 
-        for (let i = 0; i < 4; i++) {
+        indicators.each((indicator, i) => {
             if (i !== stage) {
-                stages.get(i).css({display: 'none'});
+                stages.get(i).css({display: "none"});
             }
 
-            if (Number(indicators.get(i).getData('stage')) <= stage) {
-                indicators.get(i).addClass('active');
+            if (Number(indicator.getData("stage")) <= stage) {
+                indicator.addClass("active");
             }
             else {
-                indicators.get(i).removeClass('active');
+                indicator.removeClass("active");
             }
-        }
+        });
 
-        stages.get(stage).css({display: 'block'});
+        stages.get(stage).css({display: "block"});
 
         this.updateButtons();
     }
@@ -107,16 +107,16 @@ class RegisterDirective extends Directive {
     }
 
     checkStage() {
-        let form = this.modal.find('.stage').get(this.stage).find('.modal-form');
+        let form = this.modal.find(".stage").get(this.stage).find(".modal-form");
         new HTTPRequest({
-            url: this.config.get('url') + '/checkregister?' + form.serialize(false)
+            url: this.config.get("url") + "/checkregister?" + form.serialize(false)
         }).then(result => {
             result = result.toJSON();
             let error = false;
 
             if (result.length) {
                 for (let i = 0; i < result.length; i++) {
-                    error = error === this.applyValidation(result[i]) ? error : this.applyValidation(result[i])
+                    error = error === this.applyValidation(result[i]) ? error : this.applyValidation(result[i]);
                 }
             }
             else {
@@ -128,19 +128,19 @@ class RegisterDirective extends Directive {
     }
 
     applyValidation(result) {
-        let form = this.modal.find('.stage').get(this.stage).find('.modal-form');
+        let form = this.modal.find(".stage").get(this.stage).find(".modal-form");
 
         if(result.error) {
             for (let input in result.message) {
                 let formgroup = form.find(`[name="${input}"]`).parent();
 
-                formgroup.removeClass('has-success').find('.help-block').remove();
-                formgroup.addClass('has-error')
+                formgroup.removeClass("has-success").find(".help-block").remove();
+                formgroup.addClass("has-error")
                     .append(`<div class="help-block">${result.message[input]}</div>`);
             }
         }
         else {
-            form.find('.form-group').addClass('has-success');
+            form.find(".form-group").addClass("has-success");
         }
 
         return result.error;
@@ -148,24 +148,24 @@ class RegisterDirective extends Directive {
 
     finishRegistration() {
         new HTTPRequest({
-            url: this.config.get('url') + '/register',
-            method: 'POST',
+            url: this.config.get("url") + "/register",
+            method: "POST",
             headers: {
-                'X-CSRF-TOKEN': new Element('meta[name="csrf-token"]').attr('content')
+                "X-CSRF-TOKEN": this.config.csrf
             },
             data: {
-                username: this.element.find('[name="username"]').val(),
-                password: this.element.find('[name="password"]').val(),
-                gender: this.element.find('[name="gender"]:checked').val(),
-                password_confirmation: this.element.find('[name="password_confirmation"]').val(),
-                mail: this.element.find('[name="mail"]').val()
+                username: this.element.find("[name='username']").val(),
+                password: this.element.find("[name='password']").val(),
+                gender: this.element.find("[name='gender']:checked").val(),
+                password_confirmation: this.element.find("[name='password_confirmation']").val(),
+                mail: this.element.find("[name='mail']").val()
             }
         }).then(result => {
             if (!result.error) {
                 this.walkToDoor();
-                this.gender = this.element.find('[name="gender"]:checked').val();
+                this.gender = this.element.find("[name='gender']:checked").val();
             }
-        })
+        });
     }
 
     walkToDoor() {
@@ -181,37 +181,37 @@ class RegisterDirective extends Directive {
             this.background.animate({opacity: 0}, 500, () => {
                 //let the avatar
                 this.avatar
-                    .addClass('flipped')
-                    .css({background: 'url("../assets/images/register/walking_avatar.gif")'})
-                    .animate({left: '312px', top: '386px'}, 2000, () => {
-                        this.avatar.animate({left: '255px', top: '318px'}, 1900, () => {
-                            this.avatar.animate({left: '197px', top: '296px'}, 1500, () => {
-                                this.avatar.removeClass('flipped')
-                                    .animate({left: '248px', top: '267px'}, 1900, () => {
-                                        this.avatar.css({background: 'url("../assets/images/register/standing_avatar.gif")'});
+                    .addClass("flipped")
+                    .css({background: "url('../assets/images/register/walking_avatar.gif')"})
+                    .animate({left: "312px", top: "386px"}, 2000, () => {
+                        this.avatar.animate({left: "255px", top: "318px"}, 1900, () => {
+                            this.avatar.animate({left: "197px", top: "296px"}, 1500, () => {
+                                this.avatar.removeClass("flipped")
+                                    .animate({left: "248px", top: "267px"}, 1900, () => {
+                                        this.avatar.css({background: "url('../assets/images/register/standing_avatar.gif')"});
 
                                         setTimeout(() => {
                                             this.avatar.animate({opacity: 0}, 500, () => {
                                                 this.avatar
                                                     .css({
                                                         opacity: 1,
-                                                        left: '228px',
-                                                        width: '64px',
-                                                        height: '110px',
+                                                        left: "228px",
+                                                        width: "64px",
+                                                        height: "110px",
                                                         top: 0,
-                                                        background: `url("https://www.avatar-retro.com/habbo-imaging/avatarimage.php?figure=${this.gender === 'm' ? 'cp-3120-1408.lg-285-64.cc-260-1408.hr-165-37.sh-290-91.ch-3030-85.hd-209-1' : 'ch-816-82.sh-907-64.lg-705-82.hd-600-1.hr-890-35'}&head_direction=0&direction=0&size=m&gesture=sml")`
+                                                        background: `url("https://www.avatar-retro.com/habbo-imaging/avatarimage.php?figure=${this.gender === "m" ? "cp-3120-1408.lg-285-64.cc-260-1408.hr-165-37.sh-290-91.ch-3030-85.hd-209-1" : "ch-816-82.sh-907-64.lg-705-82.hd-600-1.hr-890-35"}&head_direction=0&direction=0&size=m&gesture=sml")`
                                                     })
-                                                    .animate({top: '243px'}, 1000, () => {
-                                                        window.location.href = '/me';
+                                                    .animate({top: "243px"}, 1000, () => {
+                                                        window.location.href = "/me";
                                                     });
                                             });
-                                        }, 500)
-                                    })
-                            })
-                        })
-                    })
-            })
-        })
+                                        }, 500);
+                                    });
+                            });
+                        });
+                    });
+            });
+        });
     }
 }
 

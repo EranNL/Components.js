@@ -1,6 +1,6 @@
 import Directive from "../Directive";
 import HTTPRequest from "../../../components/http/HTTPRequest";
-import Element from "../../../components/dom/Element";
+import Element from "../../../components/dom/Node";
 
 class CheckVoucherDirective extends Directive {
     constructor(element) {

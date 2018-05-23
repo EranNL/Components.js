@@ -1,7 +1,7 @@
 import Directive from "../Directive";
 import Keyboard from "../../../components/util/Keyboard";
 import HTTPRequest from "../../../components/http/HTTPRequest";
-import Element from "../../../components/dom/Element";
+import Element from "../../../components/dom/Node";
 import Countdown from "../../../components/util/Countdown";
 
 class AuctionDirective extends Directive {
