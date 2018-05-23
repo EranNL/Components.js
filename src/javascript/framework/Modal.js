@@ -188,6 +188,31 @@ class Modal extends Component {
             .setBackground(background)
             .openDialog();
     }
+    applySearch() {
+
+        let list = this.element.find("[searchable-list]");
+        if(list.length()) {
+            let items = list.find("[searchable-item]");
+            let display = items.get(0).css("display");
+
+            this.element.find("[search]").on("keyup", element => {
+                if(element.val() === "") {
+                    items.css({"display": display});
+                }
+                else {
+                    for(let i = 0; i < items.length(); i++) {
+                        let item = items.get(i);
+                        if(new RegExp(element.val(), "i").test(item.text()) ||
+                            new RegExp(element.val(), "i").test(item.getData("search-with"))) {
+                            item.css("display", display);
+                            continue;
+                        }
+                        item.css({"display": "none"});
+                    }
+                }
+            });
+        }
+    }
 }
 
 export default Modal;

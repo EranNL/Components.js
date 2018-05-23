@@ -3,9 +3,9 @@ import Node from "./Node.js";
 
 class Events {
 
-    constructor(instance) {
+    constructor(instance, elements) {
         this.instance = instance;
-        this.elements = this.instance.element ? this.instance.element.nodeList : this.instance.nodeList;
+        this.elements = elements;
         this.events = [];
         this.registeredHandlers = {};
 
@@ -32,7 +32,6 @@ class Events {
    * Check whether a function exists in the class where this instance is called
    *
    * @param {String} func The name of the method
-   *
    * @return {boolean}
    *
    * @private
@@ -49,8 +48,6 @@ class Events {
     attachEvents() {
         let elements = this.elements.length(),
             xlength = this.events.length;
-
-
 
         for(let i = 0; i < elements; i++ ) {
             for(let x = 0 ; x < xlength; x++) {
@@ -75,8 +72,6 @@ class Events {
    *
    * @param {String} ev The name of the event
    * @param {Function} callback The callback that has to be invoked when the event occurered.
-   *
-   *
    * @return {void}
    */
     add(el, ev, callback, selector = null) {

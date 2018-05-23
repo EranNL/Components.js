@@ -1,6 +1,16 @@
 class Str {
 
     /**
+     * Returns whether the given argument is a string
+     *
+     * @param {*} str The to be checked argument
+     * @returns {boolean}
+     */
+    static isString(str) {
+        return typeof str === "string";
+    }
+
+    /**
      * Converts a string to a camelCased word
      * @param {String} string The string to convert
      * @return {string}

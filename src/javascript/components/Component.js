@@ -4,25 +4,28 @@ import Str from "./util/Str";
 
 class Component {
 
+    /**
+     * The node on which the Component wrapper is called
+     * @type {Node}
+     */
+    element;
+
+    /**
+     * Config used to configure the framework
+     * @type {Config}
+     */
+    config;
+
+    /**
+     * The events handler attached to this component.
+     * @type {Events}
+     */
+    events;
+
     constructor(element) {
-
-        /**
-         * The node on which the Component wrapper is called
-         * @type {Element}
-         */
         this.element = element;
-
-        /**
-         * Config used to configure the framework
-         * @type {Config}
-         */
         this.config = new Config();
-
-        /**
-         * The events handler attached to this component.
-         * @type {Events}
-         */
-        this.events = new Events(this);
+        this.events = new Events(this, this.element.nodeList);
 
         /**
          * Init method call. In this method, the component is made ready to serve.

@@ -12,7 +12,7 @@ class Node {
         //list of HtmlElements in the DOM matching the given element
         this.nodeList = this._select(element);
 
-        this.events = new Events(this);
+        this.events = new Events(this, this.nodeList);
 
         /**
          * Determines if the element is called by just a tag
@@ -201,11 +201,11 @@ class Node {
      * Get a specific element in the collection
      *
      * @param {number} index The index of the element in the collection
-     * @param {bool} as_node Whether the returned element should be a node
-     * @return {HTMLElement}
+     * @param {boolean} as_plain Whether the returned element should be a node
+     * @return {HTMLElement|Node}
      */
-    get(index = 0, as_node = false) {
-        return !as_node ? this.nodeList.get(index) : new Node(this.nodeList.get(index));
+    get(index = 0, as_plain = false) {
+        return as_plain ? this.nodeList.get(index) : new Node(this.nodeList.get(index));
     }
 
     /**
@@ -619,9 +619,9 @@ class Node {
 
         if(arguments.length === 1 && Str.isString(arguments[0])) {
             if(this.nodeList.length()) {
-                let number = window.getComputedStyle(this.nodeList.get(0))[arguments[0]].replace("px", "");
+                let value = window.getComputedStyle(this.nodeList.get(0))[arguments[0]].replace("px", "");
 
-                return isNaN(number) ? number : parseFloat(number);
+                return isNaN(value) ? value : parseFloat(value);
             }
 
             return null;
