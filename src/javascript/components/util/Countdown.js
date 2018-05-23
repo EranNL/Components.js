@@ -1,4 +1,4 @@
-import Element from "../dom/Element";
+import Element from "../dom/Node";
 import Collection from "./Collection";
 
 class Countdown {
