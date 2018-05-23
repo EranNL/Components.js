@@ -27,7 +27,7 @@ gulp.task('javascript', function () {
     return gulp.src([
         'src/javascript/*.js',
         'src/javascript/**/*.js',
-        //'resources/assets/js/components/Element.js',
+        //'resources/assets/js/components/Node.js',
         //'resources/assets/js/events/Event.js',
         //'resources/assets/js/events/*.js',
         //'resources/assets/js/components/*.js'

@@ -1,4 +1,4 @@
-import Element from "../../dom/Element";
+import Element from "../../dom/Node";
 import SocketEventHandler from "./SocketEventHandler";
 import Echo from "laravel-echo";
 import channels from './channels';

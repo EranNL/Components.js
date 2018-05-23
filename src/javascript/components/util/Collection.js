@@ -73,8 +73,17 @@ class Collection {
     }
 
     /**
+     * Returns the first value of the array
+     *
+     * @returns {*}
+     */
+    first() {
+        return this.array[0];
+    }
+
+    /**
      * Returns the last value of the array
-     * return {*}
+     * @return {*}
      */
     last() {
         return this.array[this.array.length - 1];
@@ -83,10 +92,14 @@ class Collection {
     /**
      * Removes the last value from the array
      *
-     * return {Collection}
+     * @return {Collection}
      */
     pop() {
         this.array.pop();
+    }
+
+    shift() {
+        return this.array.shift();
     }
 
     /**
@@ -111,9 +124,9 @@ class Collection {
     /**
      * Filter the array with a given expression. The array only contains the values that match the filter.
      *
-     * @param {callback} condition The condition callback. The rule whith wich every value has to be checked
+     * @param {Function} condition The condition callback. The rule whith wich every value has to be checked
      *
-     * @return {Object}
+     * @return {Collection}
      */
     filter(condition) {
         let filteredArray = new Collection();

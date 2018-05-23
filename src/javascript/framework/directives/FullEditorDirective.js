@@ -6,8 +6,8 @@ class FullEditorDirective extends Component {
     }
 
     init() {
-        CKEDITOR.replace( this.element.attr('id'), {
-            toolbar : 'Full',
+        CKEDITOR.replace( this.element.attr("id"), {
+            toolbar : "Full",
         });
     }
 }

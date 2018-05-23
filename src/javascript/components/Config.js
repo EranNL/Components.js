@@ -1,4 +1,4 @@
-import Element from "./dom/Element";
+import Node from "./dom/Node";
 
 
 class Config {
@@ -6,7 +6,7 @@ class Config {
     constructor() {
         this.c = this.getConfig();
 
-        this.csrf = new Element('meta[name="csrf-token"]').attr('content');
+        this.csrf = new Node('meta[name="csrf-token"]').attr('content');
     }
 
     getConfig() {
