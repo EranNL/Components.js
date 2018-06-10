@@ -22,10 +22,17 @@ class Component {
      */
     events;
 
+    /**
+     * Element in the component that shows the errors created
+     * @type {Node}
+     */
+    errorBag;
+
     constructor(element) {
         this.element = element;
         this.config = new Config();
         this.events = new Events(this, this.element.nodeList);
+        this.errorBag = this.element.find("[error-bag]");
 
         /**
          * Init method call. In this method, the component is made ready to serve.
