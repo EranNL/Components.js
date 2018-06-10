@@ -26,8 +26,8 @@ module.exports = {
         ]
     },
     plugins: [
-        new MinifyPlugin()
+        //new MinifyPlugin()
     ],
-    mode: "production"
+    mode: "development"
 
 };
