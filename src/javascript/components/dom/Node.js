@@ -4,6 +4,7 @@ import WidthDimension from "./dimensions/WidthDimension";
 import Str from "../util/Str.js";
 import Collection from "../util/Collection";
 import Effect from "./effects/Effect";
+import Component from "../Component";
 
 class Node {
 
@@ -170,6 +171,16 @@ class Node {
      * @returns {Node}
      */
     append(html) {
+        if(html instanceof Component) {
+            html = html.element.nodeList.get(0);
+
+            this.nodeList.each(node => {
+                node.appendChild(html);
+            });
+
+            return this;
+        }
+
         this.nodeList.each(node => {
             node.insertAdjacentHTML("beforeend", html);
         });
@@ -245,6 +256,19 @@ class Node {
         this.nodeList.each(element => {
             element.parentNode.removeChild(element);
         });
+    }
+
+    /**
+     * Removes all the children of the node
+     *
+     * @return {Node}
+     */
+    clear() {
+        this.children().each(node => {
+            node.remove();
+        });
+
+        return this;
     }
 
     attr(attr, value = null) {
@@ -346,7 +370,7 @@ class Node {
      * Gets the children for this element.
      *
      * @param {String|Node} selector Selector to filter the children elements
-     * @returns {Collection}
+     * @returns {Node}
      *
      * @todo Needs cleaning up
      */
@@ -578,23 +602,17 @@ class Node {
      * @param String ev
      */
     trigger(ev) {
-        if (this.isCollection()) {
-            this.nodeList.each(element => {
-                element.trigger(ev);
-            });
-        }
-        else {
+        this.nodeList.each(node => {
             let event = document.createEvent("Event");
             event.initEvent(ev, true, true);
 
-            if (this.nodeList[ev]) {
-                this.nodeList[ev].call(this.nodeList);
+            if (node[ev]) {
+                node[ev].call(this.nodeList);
             }
             else {
-                this.nodeList.dispatchEvent(event);
+                node.dispatchEvent(event);
             }
-        }
-
+        });
     }
 
     /**
@@ -694,23 +712,23 @@ class Node {
                 let text = document.createTextNode(value);
                 node.innerHTML = text.textContent;
             });
+
+            return this;
         }
         else {
             if (this.children().length()) {
                 let returnText = "";
 
-                this.children().each(element => {
-                    returnText += " " + element.text();
+                this.children().nodeList.each(node => {
+                    returnText += " " + node.innerText;
                 });
 
                 return returnText;
             }
             else {
-                return this.nodeList.innerText;
+                return this.nodeList.get(0).innerText;
             }
         }
-
-        return this;
     }
 
     /**
@@ -748,7 +766,7 @@ class Node {
         if (this.matches("form") || !form) {
             let formelements = this.find("input, textarea, select");
             for (let i = 0; i < formelements.length(); i++) {
-                let input = formelements.get(i);
+                let input = formelements.get(i, true);
                 let nodeName = input.nodeName.toLowerCase();
                 let type = input.type;
 
@@ -789,6 +807,19 @@ class Node {
         }
 
         return this;
+    }
+
+    onKeyup(event) {
+        if (event.stopPropagation) {    // standard
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        } else {    // IE6-8
+            event.cancelBubble = true;
+        }
+
+        if ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 65 && event.keyCode <= 90)) {
+            this.trigger("keyup_alphanumeric");
+        }
     }
 }
 
