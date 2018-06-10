@@ -189,21 +189,20 @@ class Modal extends Component {
             .openDialog();
     }
     applySearch() {
-
         let list = this.element.find("[searchable-list]");
         if(list.length()) {
             let items = list.find("[searchable-item]");
             let display = items.get(0).css("display");
 
-            this.element.find("[search]").on("keyup", element => {
+            this.element.find("[search]").on("input", element => {
                 if(element.val() === "") {
                     items.css({"display": display});
                 }
                 else {
                     for(let i = 0; i < items.length(); i++) {
                         let item = items.get(i);
-                        if(new RegExp(element.val(), "i").test(item.text()) ||
-                            new RegExp(element.val(), "i").test(item.getData("search-with"))) {
+                        if(item.text().indexOf(element.val()) !== -1 ||
+                            item.getData("search-with").indexOf(element.val()) !== -1) {
                             item.css("display", display);
                             continue;
                         }
