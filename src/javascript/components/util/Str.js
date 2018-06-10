@@ -16,7 +16,7 @@ class Str {
      * @return {string}
      */
     static toCamelCase(string) {
-        let words = string.toLowerCase().split(" ");
+        let words = string.toLowerCase().replace("-", " ").split(" ");
 
         for (let i = 1; i < words.length; i++) {
             words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
