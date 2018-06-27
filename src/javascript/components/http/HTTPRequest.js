@@ -12,8 +12,8 @@ class HTTPRequest {
 
             req.open(this.data.method ? this.data.method.toUpperCase() : "GET", this.data.url ? this.data.url : "", this.data.async ? this.data.async : true);
 
-            if (this.data.method && this.data.method.toUpperCase() === 'POST') {
-                req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            if (this.data.method && this.data.method.toUpperCase() === "POST") {
+                req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             }
 
             //Set the headers
@@ -28,7 +28,7 @@ class HTTPRequest {
             }
 
             if (!this.data.crossDomain) {
-                req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                req.setRequestHeader("X-Requested-With", "XMLHttpRequest");
             }
 
             req.onload = () => {
